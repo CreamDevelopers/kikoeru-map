@@ -311,26 +311,36 @@ async def encode_outputs(normalized: Path, webm: Path, m4a: Path) -> None:
             raise AudioToolError("encode failed: " + err.decode(errors="replace")[-300:])
 
 
-async def spectrogram(normalized: Path, dst: Path, size: str = "1200x300") -> None:
-    code, _o, err = await run(
-        [
-            "ffmpeg",
-            "-nostdin",
-            "-v",
-            "error",
-            "-y",
-            "-i",
-            str(normalized),
-            "-lavfi",
-            f"showspectrumpic=s={size}:legend=0:mode=combined:color=intensity:scale=log:fscale=log",
-            "-frames:v",
-            "1",
-            str(dst),
-        ],
-        timeout=120,
-    )
-    if code != 0:
-        raise AudioToolError("spectrogram failed: " + err.decode(errors="replace")[-300:])
+# ffmpeg の showspectrumpic(color=intensity) に近い配色
+_SPEC_STOPS = np.array([0.0, 0.13, 0.30, 0.60, 0.73, 0.85, 1.0])
+_SPEC_COLORS = np.array(
+    [[0, 0, 0], [30, 0, 90], [100, 0, 140], [215, 0, 30], [255, 70, 0], [255, 190, 0], [255, 255, 190]],
+    dtype=np.float64,
+)
+
+
+def spectrogram(samples: np.ndarray, rate: int, dst: Path, width: int = 1200, height: int = 300) -> None:
+    # showspectrumpic は 60 秒の音で 50 秒以上かかるので、numpy で直接描く
+    from PIL import Image
+
+    nfft = 2048
+    x = samples.astype(np.float32)
+    if len(x) < nfft:
+        x = np.pad(x, (0, nfft - len(x)))
+    starts = np.linspace(0, len(x) - nfft, width).astype(np.int64)
+    frames = x[starts[:, None] + np.arange(nfft)] * np.hanning(nfft).astype(np.float32)
+    mag = np.abs(np.fft.rfft(frames, axis=1))
+    db = 20 * np.log10(np.maximum(mag, 1e-10))
+
+    # 周波数軸は対数（上が高音）
+    freqs = np.geomspace(40, rate / 2, height)[::-1]
+    bins = np.clip(np.round(freqs / (rate / nfft)).astype(np.int64), 1, mag.shape[1] - 1)
+    db = db[:, bins].T
+
+    top = float(db.max())
+    level = np.clip((db - (top - 100)) / 100, 0, 1)
+    rgb = np.stack([np.interp(level, _SPEC_STOPS, _SPEC_COLORS[:, c]) for c in range(3)], axis=-1)
+    Image.fromarray(rgb.astype(np.uint8), "RGB").save(dst, optimize=True)
 
 
 def content_hash(path: Path) -> str:

@@ -153,12 +153,12 @@ async def _process(session: Any, sound: Sound, src: Path) -> str:
 
         webm, m4a = tmp / "a.webm", tmp / "a.m4a"
         spec = tmp / "spec.png"
-        fp, _enc, norm_samples, _spec = await asyncio.gather(
+        fp, _enc, norm_samples = await asyncio.gather(
             fingerprint.compute(normalized),
             audio.encode_outputs(normalized, webm, m4a),
             audio.decode_pcm(normalized, audio.ANALYSIS_RATE, max_dur),
-            audio.spectrogram(normalized, spec),
         )
+        await asyncio.to_thread(audio.spectrogram, norm_samples, audio.ANALYSIS_RATE, spec)
         await _progress(sound.id, 85)
 
         # 同時に処理された同じ音が両方通らないよう、重複チェックと登録を直列化する
