@@ -165,7 +165,7 @@ export class PostFlow {
     const back = $("post-back");
     const next = $("post-next");
     back.hidden = this.step === 0 || name === "progress";
-    next.hidden = name === "source" || name === "progress";
+    next.hidden = (name === "source" && !this.rawFile) || name === "progress";
     next.textContent = name === "license" ? t("post.submit") : t("ui.next");
     if (name === "trim") requestAnimationFrame(() => this.renderTrim());
     if (name === "place") this.initMiniMap();
@@ -206,6 +206,7 @@ export class PostFlow {
     }
     if (name === "license") return this.submit();
     this.step += 1;
+    if (STEPS[this.step] === "trim" && !this.buffer) this.step += 1;
     this.showStep();
   }
 
@@ -231,7 +232,7 @@ export class PostFlow {
       // デコードできない形式でもサーバー送信前に止められるよう、録音時間で判定する
       if ((Date.now() - this.recStart.getTime()) / 1000 < MIN_SEC) {
         $("rec-time").textContent = `0:00 / ${formatDuration(MAX_SEC)}`;
-        toast(t("error.too_short"));
+        this.rejectBlob("error.too_short");
         return;
       }
       const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
@@ -331,7 +332,7 @@ export class PostFlow {
     }
     if (this.buffer) {
       if (this.buffer.duration < MIN_SEC) {
-        toast(t("error.too_short"));
+        this.rejectBlob("error.too_short");
         return;
       }
       this.peaks = computePeaks(this.buffer);
@@ -340,12 +341,21 @@ export class PostFlow {
     } else {
       // ブラウザで読めない形式はそのまま送り、サーバー側で判定・カットする
       if (blob.size > MAX_BYTES) {
-        toast(t("error.too_large"));
+        this.rejectBlob("error.too_large");
         return;
       }
       toast(t("post.no_preview"));
       this.step = 2;
     }
+    this.showStep();
+  }
+
+  // 使えない音声は破棄し、前に読み込んだ音声で先へ進めないようにする
+  rejectBlob(key) {
+    this.rawFile = null;
+    this.buffer = null;
+    $("file-input").value = "";
+    toast(t(key));
     this.showStep();
   }
 
