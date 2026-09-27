@@ -11,17 +11,12 @@
   <a class="brand" href="/admin"><img class="brand-icon" src="{{ asset('icons/icon-192.png') }}" alt="" width="28" height="28">管理画面</a>
   {% if admin %}
   <nav aria-label="管理メニュー" class="admin-nav">
-    <a href="/admin">ダッシュボード</a>
-    <a href="/admin/sounds">投稿</a>
-    <a href="/admin/review">確認待ち</a>
-    <a href="/admin/reports">通報</a>
-    <a href="/admin/bans">BAN</a>
-    <a href="/admin/ngwords">NGワード</a>
-    <a href="/admin/courses">コース</a>
-    <a href="/admin/jobs">ジョブ</a>
-    <a href="/admin/audit">監査ログ</a>
-    {% if admin.role == 'admin' %}<a href="/admin/settings">設定</a><a href="/admin/accounts">アカウント</a>{% endif %}
-    <a href="/admin/security">二要素認証</a>
+    {% set items = [('/admin', 'ダッシュボード'), ('/admin/sounds', '投稿'), ('/admin/review', '確認待ち'), ('/admin/reports', '通報'), ('/admin/bans', 'BAN'), ('/admin/ngwords', 'NGワード'), ('/admin/courses', 'コース'), ('/admin/jobs', 'ジョブ'), ('/admin/audit', '監査ログ')] %}
+    {% if admin.role == 'admin' %}{% set items = items + [('/admin/settings', '設定'), ('/admin/accounts', 'アカウント')] %}{% endif %}
+    {% set items = items + [('/admin/security', '二要素認証')] %}
+    {% for href, label in items %}
+    <a href="{{ href }}"{% if request.url.path == href or (href != '/admin' and request.url.path.startswith(href ~ '/')) %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
     <form method="post" action="/admin/logout" class="inline"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit" class="btn-ghost">ログアウト（{{ admin.username }}）</button></form>
   </nav>
   {% endif %}

@@ -4,20 +4,30 @@
 .admin-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 12px;
+  gap: 4px;
   align-items: center;
   font-size: 14px;
 }
 .admin-nav a {
   color: var(--text);
   text-decoration: none;
-  padding: 6px 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
 }
 .admin-nav a:hover {
+  background: var(--surface-2);
   color: var(--accent);
+}
+.admin-nav a[aria-current="page"] {
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 .admin-nav form.inline {
   display: inline;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
 }
 .admin-main {
   max-width: 1280px;
