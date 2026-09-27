@@ -1,4 +1,6 @@
 .env
+.claude/settings.local.json
+.claude/hooks/
 backups/
 __pycache__/
 .pytest_cache/
