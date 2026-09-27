@@ -28,6 +28,10 @@ let toastTimer = 0;
 export function toast(message, ms = 3200) {
   const el = document.getElementById("toast");
   if (!el) return;
+  // モーダルの top layer より下に隠れないよう、開いているダイアログの中へ移す
+  const modals = document.querySelectorAll("dialog[open]:modal");
+  const host = modals[modals.length - 1] || document.body;
+  if (el.parentElement !== host) host.append(el);
   el.textContent = message;
   el.hidden = false;
   clearTimeout(toastTimer);
