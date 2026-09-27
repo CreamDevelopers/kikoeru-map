@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import datetime as dt
 import logging
 import math
@@ -112,6 +113,10 @@ async def process_sound(ctx: dict[str, Any], job_id: str) -> str:
     return result
 
 
+async def _progress(sound_id: str, pct: int) -> None:
+    await events.set_status(sound_id, {"state": "processing", "progress": pct})
+
+
 async def _process(session: Any, sound: Sound, src: Path) -> str:
     settings = get_settings()
     rs = await runtime_settings.load()
@@ -119,24 +124,44 @@ async def _process(session: Any, sound: Sound, src: Path) -> str:
         raise AudioRejected("unreadable")
     if src.stat().st_size > settings.max_upload_bytes:
         raise AudioRejected("too_large")
-    await audio.probe(src)
+    info = await audio.probe(src)
     max_dur = float(rs.max_duration_sec)
+    await _progress(sound.id, 10)
 
-    samples = await audio.decode_pcm(src, audio.ANALYSIS_RATE, max_dur)
+    # 元ファイルから読むものはまとめて並列に走らせる（ラウドネス測定が一番重い）
+    samples, pcm16, measured = await asyncio.gather(
+        audio.decode_pcm(src, audio.ANALYSIS_RATE, max_dur),
+        audio.decode_pcm(src, audio.VAD_RATE, max_dur, as_int16=True),
+        audio.loudnorm_measure(src, max_dur, settings.target_lufs),
+    )
     analysis = audio.analyze(samples, audio.ANALYSIS_RATE)
     if analysis.duration_sec < settings.min_duration_sec:
         raise AudioRejected("too_short")
     if analysis.silence_ratio >= settings.silence_reject_ratio:
         raise AudioRejected("silent")
+    voice = vad.speech_ratio(pcm16)
+    await _progress(sound.id, 35)
 
     settings.upload_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=settings.upload_dir, prefix="work-") as tmpdir:
         tmp = Path(tmpdir)
         normalized = tmp / "norm.wav"
-        lufs = await audio.normalize(src, normalized, max_dur, settings.target_lufs)
+        lufs = await audio.normalize(
+            src, normalized, max_dur, settings.target_lufs, measured=measured, channels=info.channels
+        )
+        await _progress(sound.id, 55)
+
+        webm, m4a = tmp / "a.webm", tmp / "a.m4a"
+        spec = tmp / "spec.png"
+        fp, _enc, norm_samples, _spec = await asyncio.gather(
+            fingerprint.compute(normalized),
+            audio.encode_outputs(normalized, webm, m4a),
+            audio.decode_pcm(normalized, audio.ANALYSIS_RATE, max_dur),
+            audio.spectrogram(normalized, spec),
+        )
+        await _progress(sound.id, 85)
 
         # 同時に処理された同じ音が両方通らないよう、重複チェックと登録を直列化する
-        fp = await fingerprint.compute(normalized)
         await session.execute(delete(Fingerprint).where(Fingerprint.sound_id == sound.id))
         await session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": FP_LOCK_ID})
         dup = await fingerprint.find_duplicate(session, fp)
@@ -145,24 +170,17 @@ async def _process(session: Any, sound: Sound, src: Path) -> str:
         session.add(fingerprint.to_model(sound.id, fp))
         await session.commit()
 
-        pcm16 = await audio.decode_pcm(src, audio.VAD_RATE, max_dur, as_int16=True)
-        voice = vad.speech_ratio(pcm16)
-
-        webm, m4a = tmp / "a.webm", tmp / "a.m4a"
-        await audio.encode_outputs(normalized, webm, m4a)
-        norm_samples = await audio.decode_pcm(normalized, audio.ANALYSIS_RATE, max_dur)
         peaks_file = tmp / "peaks.json"
         peaks_file.write_bytes(
             orjson.dumps({"peaks": audio.compute_peaks(norm_samples), "duration": len(norm_samples) / 48000})
         )
-        spec = tmp / "spec.png"
-        await audio.spectrogram(normalized, spec)
 
         hashes = {}
         for path, ext in ((webm, "webm"), (m4a, "m4a"), (peaks_file, "json"), (spec, "png")):
             h = audio.content_hash(path)
             media.store(path, sound.id, h, ext)
             hashes[ext] = h
+        await _progress(sound.id, 95)
 
     sound.webm_hash = hashes["webm"]
     sound.m4a_hash = hashes["m4a"]

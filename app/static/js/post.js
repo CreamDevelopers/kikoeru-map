@@ -12,6 +12,7 @@ const L = window.L;
 const MAX_SEC = 60;
 const MIN_SEC = 5;
 const MAX_BYTES = 20 * 1024 * 1024;
+const UPLOAD_SHARE = 0.4;
 const STEPS = ["source", "trim", "place", "details", "license", "progress"];
 
 const $ = (id) => document.getElementById(id);
@@ -144,7 +145,7 @@ export class PostFlow {
     $("file-input").value = "";
     $("post-error").textContent = "";
     $("post-result").replaceChildren();
-    $("upload-bar").style.width = "0";
+    this.setProgress(0);
     $("rec-time").textContent = `0:00 / ${formatDuration(MAX_SEC)}`;
     this.showStep();
   }
@@ -520,11 +521,16 @@ export class PostFlow {
       return;
     }
     this.submitting = true;
-    let file;
-    try {
-      file = this.buffer ? await encodeWav(this.buffer, this.trim.start, this.trim.end) : this.rawFile;
-    } catch {
-      file = this.rawFile;
+    // 切り取っていなければ圧縮済みの元ファイルをそのまま送る（WAV より小さく、変換待ちもない）
+    const untrimmed =
+      this.buffer && this.trim.start < 0.05 && this.trim.end > this.buffer.duration - 0.05 && this.buffer.duration <= MAX_SEC;
+    let file = this.rawFile;
+    if (this.buffer && !(untrimmed && this.rawFile.size <= MAX_BYTES)) {
+      try {
+        file = await encodeWav(this.buffer, this.trim.start, this.trim.end);
+      } catch {
+        file = this.rawFile;
+      }
     }
     if (file.size > MAX_BYTES) {
       err.textContent = t("error.too_large");
@@ -532,7 +538,7 @@ export class PostFlow {
       return;
     }
     const fd = new FormData();
-    fd.append("file", file, this.buffer ? "audio.wav" : "audio");
+    fd.append("file", file, file === this.rawFile ? "audio" : "audio.wav");
     fd.append("title", $("f-title").value.trim());
     fd.append("comment", $("f-comment").value.trim());
     fd.append("recorded_at", this.recordedAt.toISOString());
@@ -553,7 +559,7 @@ export class PostFlow {
     this.setStatus("upload");
     let res;
     try {
-      res = await uploadForm("/api/sounds", fd, (p) => ($("upload-bar").style.width = `${Math.round(p * 100)}%`));
+      res = await uploadForm("/api/sounds", fd, (p) => this.setProgress(p * UPLOAD_SHARE));
     } catch (e) {
       this.turnstile.reset();
       this.submitting = false;
@@ -564,8 +570,16 @@ export class PostFlow {
     }
     this.turnstile.reset();
     saveToken(res.id, res.delete_token);
+    this.setProgress(UPLOAD_SHARE);
     this.setStatus("processing");
     this.watch(res);
+  }
+
+  // アップロードを前半、サーバー処理を後半として 1 本の % にまとめる
+  setProgress(ratio) {
+    const pct = Math.max(0, Math.min(100, Math.round(ratio * 100)));
+    $("upload-bar").style.width = `${pct}%`;
+    $("post-percent").textContent = `${pct}%`;
   }
 
   setStatus(active) {
@@ -585,11 +599,13 @@ export class PostFlow {
       this.submitting = false;
       const nodes = [];
       if (state === "published") {
+        this.setProgress(1);
         this.setStatus("done");
         nodes.push(Object.assign(document.createElement("p"), { textContent: t("post.done.published") }));
         const a = Object.assign(document.createElement("a"), { className: "btn btn-primary", href: res.page_url, textContent: t("sound.page") });
         nodes.push(a);
       } else if (state === "pending_review") {
+        this.setProgress(1);
         this.setStatus("done");
         nodes.push(Object.assign(document.createElement("p"), { textContent: t("post.done.pending") }));
       } else {
@@ -608,6 +624,7 @@ export class PostFlow {
       const d = JSON.parse(e.data);
       if (["published", "pending_review", "rejected", "failed"].includes(d.state)) done(d.state, d.reason, d.warnings || []);
       else if (d.retrying) result.textContent = t("post.retrying", { n: d.attempt });
+      else if (typeof d.progress === "number") this.setProgress(UPLOAD_SHARE + (1 - UPLOAD_SHARE) * (d.progress / 100));
     });
   }
 }

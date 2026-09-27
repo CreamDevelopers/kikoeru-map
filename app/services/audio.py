@@ -221,8 +221,18 @@ async def loudnorm_measure(path: Path, max_seconds: float, target: float) -> dic
     return data
 
 
-async def normalize(src: Path, dst: Path, max_seconds: float, target: float) -> float:
-    m = await loudnorm_measure(src, max_seconds, target)
+async def normalize(
+    src: Path,
+    dst: Path,
+    max_seconds: float,
+    target: float,
+    *,
+    measured: dict[str, str] | None = None,
+    channels: int | None = None,
+) -> float:
+    m = measured if measured is not None else await loudnorm_measure(src, max_seconds, target)
+    if channels is None:
+        channels = await _channels(src)
 
     def val(key: str, default: float, lo: float, hi: float) -> str:
         # 極端に大きい音では測定値が loudnorm の受け付ける範囲を超えるので丸める
@@ -256,7 +266,7 @@ async def normalize(src: Path, dst: Path, max_seconds: float, target: float) -> 
             "-af",
             filt,
             "-ac",
-            "2" if await _channels(src) >= 2 else "1",
+            "2" if channels >= 2 else "1",
             "-ar",
             "48000",
             "-map_metadata",

@@ -199,6 +199,7 @@
     <section data-step="progress" hidden>
       <h3>{{ t('post.step.progress') }}</h3>
       <div class="progress" aria-hidden="true"><div id="upload-bar"></div></div>
+      <p class="progress-pct" id="post-percent" aria-live="off">0%</p>
       <ul class="status-list" id="post-status">
         <li data-s="upload"><span class="material-symbols-outlined" aria-hidden="true">upload</span>{{ t('post.status.upload') }}</li>
         <li data-s="processing"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span>{{ t('post.status.processing') }}</li>

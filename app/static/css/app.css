@@ -1113,6 +1113,12 @@ body.page {
   padding-left: 1.6em;
   margin: 8px 0;
 }
+.progress-pct {
+  margin: 6px 0 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
 .toast {
   position: fixed;
   left: 50%;
