@@ -1,0 +1,14 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}二要素認証{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>確認コード</h1>
+  {% if error %}<p class="notice warn" role="alert">{{ 'しばらくしてからお試しください' if error == 'locked' else '確認コードが正しくありません' }}</p>{% endif %}
+  <form method="post" action="/admin/login/totp">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <label class="field"><span>認証アプリに表示されている6桁のコード</span>
+      <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" required maxlength="7" autofocus></label>
+    <button type="submit" class="primary">確認</button>
+  </form>
+</section>
+{% endblock %}

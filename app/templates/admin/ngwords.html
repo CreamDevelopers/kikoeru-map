@@ -1,0 +1,23 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}NGワード{% endblock %}
+{% block content %}
+<h1>NGワード</h1>
+<p class="small muted">タイトル・コメント・ランキングのニックネームに含まれていたら拒否します。通常の語は全角・半角や大文字・小文字の違いを無視して判定します。</p>
+<form method="post" action="/admin/ngwords" class="filters">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <label>語句またはパターン<input name="pattern" required maxlength="200"></label>
+  <label class="check"><input type="checkbox" name="is_regex" value="true"> 正規表現</label>
+  <button type="submit" class="primary">追加</button>
+</form>
+<table class="table">
+  <thead><tr><th>パターン</th><th>種類</th><th>追加日</th><th></th></tr></thead>
+  <tbody>
+  {% for w in words %}
+    <tr><td><code>{{ w.pattern }}</code></td><td>{{ '正規表現' if w.is_regex else '語句' }}</td><td class="small">{{ w.created_at.strftime('%Y-%m-%d') }}</td>
+      <td><form method="post" action="/admin/ngwords/{{ w.id }}/delete"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit" class="danger">削除</button></form></td></tr>
+  {% else %}
+    <tr><td colspan="4" class="muted">登録はありません</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

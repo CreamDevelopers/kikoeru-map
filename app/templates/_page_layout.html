@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block body %}
+<header class="page-header">
+  <a class="brand" href="/"><img class="brand-icon" src="{{ asset('icons/icon-192.png') }}" alt="" width="28" height="28">{{ t('app.name') }}</a>
+  <nav aria-label="{{ t('nav.main') }}">
+    <a class="btn btn-ghost" href="/list/new">{{ t('nav.new') }}</a>
+    <a class="btn btn-ghost" href="/list/popular">{{ t('nav.popular') }}</a>
+    <a class="btn btn-ghost" href="/list/prefs">{{ t('nav.prefs') }}</a>
+    <a class="btn btn-ghost" href="?lang={{ 'en' if lang == 'ja' else 'ja' }}" hreflang="{{ 'en' if lang == 'ja' else 'ja' }}">{{ t('nav.lang_switch') }}</a>
+  </nav>
+</header>
+<main id="main" class="page-main">
+  {% block content %}{% endblock %}
+</main>
+<footer class="page-footer">
+  <a href="/about/help">{{ t('nav.help') }}</a>
+  <a href="/about/guidelines">{{ t('nav.guidelines') }}</a>
+  <a href="/about/terms">{{ t('nav.terms') }}</a>
+  <a href="/about/privacy">{{ t('nav.privacy') }}</a>
+  <a href="/about/attribution">{{ t('nav.attribution') }}</a>
+  <span>{{ t('map.source') }}: <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener" target="_blank">{{ t('map.gsi') }}</a></span>
+  {% include "_operator.html" %}
+</footer>
+{% endblock %}

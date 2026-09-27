@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>できること — きこえる地図プロジェクト</title>
+  <meta name="description" content="きこえる地図の機能紹介。聴く・聴き比べ、散歩モード、散歩コース、音の風景、場所当てゲーム「みみあて」、音の投稿、オフライン再生など。">
+  <meta name="theme-color" content="#1ab3a0">
+  <link rel="canonical" href="https://www.kikoeru.org/features.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="きこえる地図プロジェクト">
+  <meta property="og:title" content="できること — きこえる地図プロジェクト">
+  <meta property="og:url" content="https://www.kikoeru.org/features.html">
+  <meta property="og:image" content="https://www.kikoeru.org/assets/kikoeru-logo.png">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <script src="js/theme-init.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へ移動</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="header-logo logo-plate" aria-label="きこえる地図プロジェクト トップ"><img src="assets/kikoeru-logo.png" alt="きこえる地図プロジェクト" width="150" height="45"></a>
+      <button type="button" class="icon-button menu-button" id="menu-button" aria-controls="site-nav" aria-expanded="false" aria-label="メニュー"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <nav id="site-nav" class="header-nav" aria-label="メインメニュー">
+        <a href="about.html">プロジェクトについて</a>
+        <a href="features.html">できること</a>
+        <a href="guide.html">使い方</a>
+        <a href="contribute.html">開発に参加</a>
+        <a href="sponsors.html">スポンサー</a>
+        <a href="faq.html">よくある質問</a>
+      </nav>
+      <button type="button" class="icon-button" id="theme-button" aria-label="テーマ"></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <p class="eyebrow">FEATURES</p>
+        <h1>できること</h1>
+        <p>きこえる地図は、音を「聴く」「旅する」「遊ぶ」「残す」ための機能をそろえています。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <article class="feature" id="listen">
+          <div>
+            <h2>聴く・聴き比べる</h2>
+            <p class="tagline">ピンをタップして、その場所へ。</p>
+          </div>
+          <div>
+            <p>地図上のピンを選ぶと、下のパネルに波形付きのプレイヤーが開きます。波形をクリックやドラッグで好きな位置から聴けて、音はフェードイン・フェードアウトでやわらかく始まり、終わります。再生中のピンは、音の大きさに合わせて波紋のように揺れます。</p>
+            <p>同じ場所（半径 50m 以内）に複数の音があるピンには印が付きます。朝と夜、晴れと雨、季節ごとに並べて聴き比べたり、2 つの音を同時に流してスライダーで割合を変えたりできます。</p>
+            <ul class="list">
+              <li>スマートフォンのロック画面や通知から操作できます</li>
+              <li>キーボード操作に対応（スペースで再生・停止、←→でシーク）</li>
+              <li>国土地理院の淡色地図・標準地図・写真を切り替え可能</li>
+              <li>投稿の多い地域がわかるヒートマップ表示</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="feature" id="walk">
+          <div>
+            <h2>散歩モード</h2>
+            <p class="tagline">流しっぱなしで、日本を歩く。</p>
+          </div>
+          <div>
+            <p>ボタンひとつで、各地の音をランダムに連続再生します。音と音はクロスフェードでなめらかにつながり、1 曲ごとに地図がその場所へゆっくり移動します。次の音は先読みしておくので、途切れることがありません。</p>
+            <ul class="list">
+              <li>「この地方だけ」「雨の音だけ」「夜の音だけ」「今の時間帯に合う音」などで絞り込み</li>
+              <li>画面を最小限にする没入表示で、作業用 BGM に</li>
+              <li>15 分・30 分・60 分のスリープタイマー</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="feature" id="course">
+          <div>
+            <h2>散歩コース</h2>
+            <p class="tagline">テーマのある音の旅。</p>
+          </div>
+          <div>
+            <p>運営チームが選んだ音を順番に並べた「コース」を再生すると、地図上にルートが描かれ、順番に移動しながら音が流れます。ひとつの街をめぐるコース、ひとつのテーマで各地をつなぐコースなど、音のガイドツアーのように楽しめます。</p>
+          </div>
+        </article>
+
+        <article class="feature" id="spatial">
+          <div>
+            <h2>音の風景</h2>
+            <p class="tagline">地図の中に、立ってみる。</p>
+          </div>
+          <div>
+            <p>地図の中心を「自分の立ち位置」として、周りにある最大 8 つの音を同時に鳴らします。音は方向に応じて左右に分かれ、遠くの音ほど小さく聞こえます。地図をドラッグして歩き回ると、聞こえ方がリアルタイムに変わります。</p>
+            <p>録音した向きが記録されている音は、その向きも反映されます。ヘッドホンでの利用がおすすめです。</p>
+          </div>
+        </article>
+
+        <article class="feature" id="game">
+          <div>
+            <h2>みみあて</h2>
+            <p class="tagline">この音、どこの音？</p>
+          </div>
+          <div>
+            <p>音だけを聴いて、録音された場所を地図の上で推測するゲームです。正解に近いほど高得点（1 問最大 5000 点）で、1 ゲームは 5 問。結果画面では推測と正解が線で結ばれ、シェア用のテキストも作れます。</p>
+            <ul class="list">
+              <li>1 日 1 回の「今日のお題」は全員が同じ 5 問に挑戦し、ランキングに参加できます</li>
+              <li>正解の位置は回答するまで分からない仕組みです</li>
+              <li>出題には、場所を当てるのにふさわしいと運営が確認した音だけを使います</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="feature" id="post">
+          <div>
+            <h2>音を投稿する</h2>
+            <p class="tagline">あなたの街の音を、地図に。</p>
+          </div>
+          <div>
+            <p>ブラウザ上で録音するか、音声ファイルを選んで投稿できます。録音中は入力レベルと波形、残り時間が表示され、録音後は使う範囲をトリミングできます。</p>
+            <ol class="steps">
+              <li><strong>録音またはファイルを選ぶ</strong>5 秒から 60 秒まで。</li>
+              <li><strong>試聴・トリミング</strong>使いたい部分だけを選びます。</li>
+              <li><strong>場所を選ぶ</strong>地図をタップするか、現在地を使います。必要なら位置をぼかします。</li>
+              <li><strong>タイトルや時間帯・天気・季節・ジャンルを入力</strong>時間帯と季節は録音日時から自動で入ります。</li>
+              <li><strong>ライセンスを選んで送信</strong>処理の進み具合がリアルタイムに表示されます。</li>
+            </ol>
+            <p>投稿した音はブラウザに保存された鍵で、あとから編集・削除できます。アカウントは要りません。</p>
+          </div>
+        </article>
+
+        <article class="feature" id="quality">
+          <div>
+            <h2>聴きやすく、安心な音に</h2>
+            <p class="tagline">投稿された音は自動で整えます。</p>
+          </div>
+          <div>
+            <ul class="list">
+              <li>音量を自動でそろえるので、音ごとに音量を調整する必要がありません</li>
+              <li>ファイルに含まれる機器情報や位置情報などのメタデータは削除します</li>
+              <li>ほとんど無音の録音や、すでにある音と同じ録音は投稿できません</li>
+              <li>人の声が多く含まれていそうな録音は、運営が確認するまで公開しません</li>
+              <li>音割れがひどい場合は、投稿者に知らせます</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="feature" id="pwa">
+          <div>
+            <h2>アプリのように使える</h2>
+            <p class="tagline">ホーム画面に追加して、オフラインでも。</p>
+          </div>
+          <div>
+            <p>スマートフォンのホーム画面に追加すると、アプリのように起動できます。一度聴いた音と表示した地図は一定量まで端末に保存されるので、電波の届かない場所でも聴き返せます。</p>
+            <ul class="list">
+              <li>日本語・英語の表示に対応</li>
+              <li>ライト・ダークのテーマ（OS の設定に追従、手動切り替えも可能）</li>
+              <li>キーボード操作・スクリーンリーダー・動きを減らす設定に配慮</li>
+            </ul>
+          </div>
+        </article>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="https://map.kikoeru.org/">きこえる地図をひらく</a>
+          <a class="btn" href="guide.html">使い方を見る</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo-plate"><img src="assets/kikoeru-logo.png" alt="きこえる地図プロジェクト" width="160" height="48" loading="lazy"></span>
+          <p>音だけで、場所を旅する。日本各地の環境音を地図に残すオープンソースプロジェクトです。</p>
+        </div>
+        <div class="footer-col">
+          <h2>プロジェクト</h2>
+          <ul>
+            <li><a href="about.html">プロジェクトについて</a></li>
+            <li><a href="features.html">できること</a></li>
+            <li><a href="guide.html">使い方</a></li>
+            <li><a href="faq.html">よくある質問</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>参加する</h2>
+          <ul>
+            <li><a href="https://map.kikoeru.org/">きこえる地図をひらく</a></li>
+            <li><a href="contribute.html">開発に参加</a></li>
+            <li><a href="https://github.com/CreamDevelopers/kikoeru-map" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/CreamDevelopers/kikoeru-map/issues" rel="noopener">Issues</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>スポンサー</h2>
+          <ul>
+            <li><a href="sponsors.html">スポンサーについて</a></li>
+            <li><a href="https://www.creamgroup.net" rel="noopener">CreamDevelopers</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; きこえる地図プロジェクト</p>
+        <p>地図データ: <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener">国土地理院</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

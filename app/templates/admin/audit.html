@@ -1,0 +1,26 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}監査ログ{% endblock %}
+{% block content %}
+<h1>監査ログ</h1>
+<form method="get" class="filters">
+  <label>操作（前方一致）<input name="action" value="{{ filters.action }}" placeholder="sound. / report. / ban." maxlength="64"></label>
+  <label>管理者<input name="user" value="{{ filters.user }}" maxlength="64"></label>
+  <label>対象ID・内容<input name="q" value="{{ filters.q }}" maxlength="64"></label>
+  <button type="submit">検索</button>
+</form>
+<table class="table">
+  <thead><tr><th>日時</th><th>管理者</th><th>操作</th><th>対象</th><th>詳細</th></tr></thead>
+  <tbody>
+  {% for l in logs %}
+    <tr><td class="small">{{ l.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ l.admin_username }}</td><td><code>{{ l.action }}</code></td>
+      <td class="small">{{ l.target_type or '' }} {{ l.target_id or '' }}</td><td class="small"><code>{{ l.detail|tojson }}</code></td></tr>
+  {% else %}
+    <tr><td colspan="5" class="muted">記録はありません</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<nav class="pager">
+  {% if page > 1 %}<a class="btn" href="?action={{ filters.action|urlencode }}&user={{ filters.user|urlencode }}&q={{ filters.q|urlencode }}&page={{ page - 1 }}">前へ</a>{% else %}<span></span>{% endif %}
+  {% if has_next %}<a class="btn" href="?action={{ filters.action|urlencode }}&user={{ filters.user|urlencode }}&q={{ filters.q|urlencode }}&page={{ page + 1 }}">次へ</a>{% endif %}
+</nav>
+{% endblock %}

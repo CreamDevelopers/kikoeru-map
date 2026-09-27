@@ -1,0 +1,35 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}二要素認証{% endblock %}
+{% block content %}
+<h1>セキュリティ設定</h1>
+<section class="narrow">
+  <h2>二要素認証（TOTP）</h2>
+  {% if user.totp_enabled %}
+  <p>二要素認証は<strong>有効</strong>です。</p>
+  <form method="post" action="/admin/security/totp/disable">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+    <label class="field"><span>無効にするには現在のコードを入力</span><input name="code" inputmode="numeric" autocomplete="one-time-code" required maxlength="7"></label>
+    <button type="submit" class="danger">無効にする</button>
+  </form>
+  {% else %}
+  <ol>
+    <li>認証アプリ（Google Authenticator、1Password、Authy など）で QR コードを読み取ります。</li>
+    <li>アプリに表示された6桁のコードを入力して有効にします。</li>
+  </ol>
+  <div class="qr">{{ qr }}</div>
+  <p class="small">QR コードを読み取れない場合のキー: <code>{{ secret }}</code></p>
+  <form method="post" action="/admin/security/totp/enable">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+    <label class="field"><span>確認コード</span><input name="code" inputmode="numeric" autocomplete="one-time-code" required maxlength="7"></label>
+    <button type="submit" class="primary">有効にする</button>
+  </form>
+  {% endif %}
+  <h2>パスワード変更</h2>
+  <form method="post" action="/admin/security/password">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+    <label class="field"><span>現在のパスワード</span><input name="current" type="password" required autocomplete="current-password"></label>
+    <label class="field"><span>新しいパスワード（12文字以上）</span><input name="new" type="password" required minlength="12" autocomplete="new-password"></label>
+    <button type="submit" class="primary">変更</button>
+  </form>
+</section>
+{% endblock %}

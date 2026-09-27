@@ -1,0 +1,64 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}投稿一覧{% endblock %}
+{% block content %}
+<h1>投稿一覧</h1>
+<form method="get" class="filters">
+  <label>状態<select name="status"><option value="">すべて</option>{% for s in statuses %}<option value="{{ s }}" {% if filters.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+  <label>タグ<select name="tag"><option value="">すべて</option>{% for tg in tags %}<option value="{{ tg }}" {% if filters.tag == tg %}selected{% endif %}>{{ t('tag.' ~ tg) }}</option>{% endfor %}</select></label>
+  <label>フラグ<select name="flag"><option value="">なし</option>
+    {% for k, v in [('voice','人の声'),('clipping','音割れ'),('game_ok','出題可'),('reported','通報あり')] %}<option value="{{ k }}" {% if filters.flag == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
+  <label>投稿日（から）<input type="date" name="date_from" value="{{ filters.date_from }}"></label>
+  <label>投稿日（まで）<input type="date" name="date_to" value="{{ filters.date_to }}"></label>
+  <label>検索<input name="q" value="{{ filters.q }}" placeholder="タイトル・ID・市区町村" maxlength="40"></label>
+  <button type="submit">絞り込み</button>
+</form>
+<form method="post" action="/admin/sounds/bulk" id="bulk-form">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <input type="hidden" name="back" value="{{ request.url.path }}?{{ request.url.query }}">
+  <div class="row bulk-bar">
+    <label class="check"><input type="checkbox" id="select-all"> すべて選択</label>
+    <select name="action" aria-label="一括操作">
+      <option value="publish">公開</option><option value="hide">非公開</option><option value="delete">削除</option>
+      <option value="game_on">出題可にする</option><option value="game_off">出題不可にする</option>
+    </select>
+    <button type="submit" data-confirm="選択した投稿に一括操作を実行しますか？">一括実行</button>
+  </div>
+  <table class="table">
+    <thead><tr><th></th><th>投稿</th><th>状態</th><th>チェック</th><th>試聴</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for s in items %}
+      <tr>
+        <td><input type="checkbox" name="ids" value="{{ s.id }}" aria-label="{{ s.title }} を選択"></td>
+        <td>
+          <strong>{% if s.status == 'published' %}<a href="/s/{{ s.id }}" target="_blank" rel="noopener">{{ s.title }}</a>{% else %}{{ s.title }}{% endif %}</strong><br>
+          <span class="small muted">{{ s.id }} ・ {{ s.pref_name or '' }}{{ s.city_name or '' }} ・ {{ s.created_at.strftime('%Y-%m-%d %H:%M') }} ・ {{ s.tags|join(', ') }} ・ 再生 {{ s.play_count }}</span>
+          {% if s.comment %}<br><span class="small">{{ s.comment }}</span>{% endif %}
+        </td>
+        <td>{{ s.status }}{% if s.hidden_reason %}<br><span class="small muted">{{ s.hidden_reason }}</span>{% endif %}{% if s.reject_reason %}<br><span class="small muted">{{ s.reject_reason }}</span>{% endif %}</td>
+        <td class="small">
+          {% if s.voice_ratio is not none %}声 {{ '%.0f'|format(s.voice_ratio * 100) }}%{% if s.voice_flag %} <strong>要確認</strong>{% endif %}<br>{% endif %}
+          {% if s.clipping_warning %}<strong>音割れ</strong><br>{% endif %}
+          {% if s.game_ok %}出題可<br>{% endif %}
+          {% if report_counts.get(s.id) %}通報 {{ report_counts[s.id] }}{% endif %}
+        </td>
+        <td class="preview">
+          {% if s.webm_hash %}<audio controls preload="none" src="/media/{{ s.id }}/{{ s.m4a_hash }}.m4a"></audio>{% endif %}
+          {% if s.spectrogram_hash %}<details><summary>スペクトログラム</summary><img class="spectrogram" loading="lazy" alt="スペクトログラム" src="/media/{{ s.id }}/{{ s.spectrogram_hash }}.png"></details>{% endif %}
+        </td>
+        <td class="ops">
+          {% for act, label in [('publish','公開'),('hide','非公開'),('delete','削除'),('game_on' if not s.game_ok else 'game_off', '出題可' if not s.game_ok else '出題不可')] %}
+          <button type="submit" formaction="/admin/sounds/{{ s.id }}/action" name="row_action" value="{{ act }}" class="small-btn" {% if act == 'delete' %}data-confirm="削除しますか？"{% endif %}>{{ label }}</button>
+          {% endfor %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">該当する投稿はありません</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</form>
+<nav class="pager">
+  {% if page > 1 %}<a class="btn" href="?{{ request.url.query|replace('page=' ~ page, '') }}&page={{ page - 1 }}">前へ</a>{% else %}<span></span>{% endif %}
+  {% if has_next %}<a class="btn" href="?{{ request.url.query|replace('page=' ~ page, '') }}&page={{ page + 1 }}">次へ</a>{% endif %}
+</nav>
+{% endblock %}

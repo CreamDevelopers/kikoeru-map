@@ -1,0 +1,28 @@
+{% extends "_page_layout.html" %}
+{% block title %}{% if pref %}{{ pref.ja if lang == 'ja' else pref.en }}{% else %}{{ t('list.' ~ kind) }}{% endif %} — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>{% if pref %}{{ pref.ja if lang == 'ja' else pref.en }}{% else %}{{ t('list.' ~ kind) }}{% endif %}</h1>
+{% if not items %}
+<p class="muted">{{ t('list.empty') }}</p>
+{% else %}
+<ul class="card-list">
+  {% for s in items %}
+  <li>
+    <h3><a href="/s/{{ s.id }}">{{ s.title }}</a></h3>
+    <p class="small muted">{{ s.pref_name or '' }} {{ s.city_name or '' }}
+      {% if s.time_of_day %} ・ {{ t('tod.' ~ s.time_of_day) }}{% endif %}
+      {% if s.weather %} ・ {{ t('weather.' ~ s.weather) }}{% endif %}
+      ・ {{ t('field.plays') }} {{ s.play_count }}</p>
+    <div class="row">
+      {% for tg in s.tags %}<span class="chip">{{ t('tag.' ~ tg) }}</span>{% endfor %}
+      <a class="btn btn-ghost small" href="/?s={{ s.id }}&lat={{ s.lat }}&lng={{ s.lng }}&z=15"><span class="material-symbols-outlined" aria-hidden="true">map</span>{{ t('sound.open_map') }}</a>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+<nav class="pager" aria-label="{{ t('ui.pagination') }}">
+  {% if page > 1 %}<a class="btn" href="?page={{ page - 1 }}" rel="prev">{{ t('ui.prev') }}</a>{% else %}<span></span>{% endif %}
+  {% if has_next %}<a class="btn" href="?page={{ page + 1 }}" rel="next">{{ t('ui.next') }}</a>{% endif %}
+</nav>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "_page_layout.html" %}
+{% block title %}Map attribution — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>Map attribution</h1>
+<p>Maps use GSI tiles by the <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener" target="_blank">Geospatial Information Authority of Japan (国土地理院)</a>.</p>
+<ul>
+  <li>Standard / pale maps and seamless photos: source <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener" target="_blank">国土地理院</a></li>
+  <li>Place search: <a href="https://msearch.gsi.go.jp/" rel="noopener" target="_blank">GSI address search API</a></li>
+  <li>Display addresses: <a href="https://mreversegeocoder.gsi.go.jp/" rel="noopener" target="_blank">GSI reverse geocoder</a></li>
+</ul>
+<p>Tiles are used under the <a href="https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html" rel="noopener" target="_blank">GSI terms of use</a>. The offline tile cache keeps at most 500 tiles for 7 days on your device and evicts the oldest first.</p>
+<p>Libraries: Leaflet (BSD-2-Clause), Supercluster (ISC), Leaflet.heat (BSD-2-Clause). Icons: Material Symbols (Apache-2.0).</p>
+{% endblock %}

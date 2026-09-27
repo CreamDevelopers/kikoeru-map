@@ -1,0 +1,16 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}ログイン{% endblock %}
+{% block admin_head %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="{{ nonce }}"></script>{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>ログイン</h1>
+  {% if error %}<p class="notice warn" role="alert">{{ {'invalid':'ユーザー名またはパスワードが正しくありません','locked':'ログイン試行回数が上限に達しました。しばらくしてからお試しください','turnstile':'スパム対策の確認に失敗しました。もう一度お試しください','csrf':'フォームの有効期限が切れました。もう一度お試しください'}.get(error, 'エラーが発生しました') }}</p>{% endif %}
+  <form method="post" action="/admin/login">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <label class="field"><span>ユーザー名</span><input name="username" autocomplete="username" required maxlength="64"></label>
+    <label class="field"><span>パスワード</span><input name="password" type="password" autocomplete="current-password" required maxlength="256"></label>
+    <div class="cf-turnstile turnstile-box" data-sitekey="{{ turnstile_site_key }}" data-action="login"></div>
+    <button type="submit" class="primary">ログイン</button>
+  </form>
+</section>
+{% endblock %}

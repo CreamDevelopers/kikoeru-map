@@ -1,0 +1,23 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}ダッシュボード{% endblock %}
+{% block admin_head %}<link rel="stylesheet" href="{{ cdn.leaflet_css[0] }}" integrity="{{ cdn.leaflet_css[1] }}" crossorigin="anonymous">{% endblock %}
+{% block content %}
+<h1>ダッシュボード</h1>
+<ul class="stat-grid">
+  <li><span class="label">総投稿数（公開中）</span><span class="value">{{ stats.total }}</span></li>
+  <li><span class="label">今日の投稿数</span><span class="value">{{ stats.today }}</span></li>
+  <li><a href="/admin/reports"><span class="label">未対応の通報（投稿数）</span><span class="value">{{ stats.open_reports }}</span></a></li>
+  <li><a href="/admin/review"><span class="label">確認待ち</span><span class="value">{{ stats.pending }}</span></a></li>
+  <li><span class="label">総再生数</span><span class="value">{{ stats.plays }}</span></li>
+</ul>
+<section>
+  <h2>日別の投稿数（30日）</h2>
+  <div class="chart" id="chart-posts" role="img" aria-label="日別投稿数のグラフ"></div>
+  <h2>日別の再生数（30日）</h2>
+  <div class="chart" id="chart-plays" role="img" aria-label="日別再生数のグラフ"></div>
+  <h2>都道府県別の投稿数</h2>
+  <div id="pref-map" class="pref-map"></div>
+  <details><summary>一覧で見る</summary><table class="table" id="pref-table"><thead><tr><th>都道府県</th><th>投稿数</th></tr></thead><tbody></tbody></table></details>
+</section>
+{% endblock %}
+{% block admin_scripts %}<script src="{{ cdn.leaflet_js[0] }}" integrity="{{ cdn.leaflet_js[1] }}" crossorigin="anonymous" nonce="{{ nonce }}"></script>{% endblock %}

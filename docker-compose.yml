@@ -1,0 +1,98 @@
+name: kikoeru
+
+x-app-common: &app-common
+  image: kikoeru-app:latest
+  env_file: .env
+  environment:
+    PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus
+  volumes:
+    - media:/data
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: "20m", max-file: "5" }
+
+services:
+  app:
+    <<: *app-common
+    build:
+      context: .
+      target: runtime
+    command: ["web"]
+    expose: ["8000"]
+    tmpfs:
+      - /tmp/prometheus:uid=10001,gid=10001
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  worker:
+    <<: *app-common
+    command: ["worker"]
+    depends_on:
+      app: { condition: service_healthy }
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "arq", "--check", "app.worker.WorkerSettings"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kikoeru}
+      POSTGRES_USER: ${POSTGRES_USER:-kikoeru}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD を .env に設定してください}
+    command: ["postgres", "-c", "shared_buffers=256MB", "-c", "max_connections=200", "-c", "random_page_cost=1.1"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  cloudflared:
+    build:
+      context: docker/cloudflared
+    image: kikoeru-cloudflared:latest
+    init: true
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      app: { condition: service_healthy }
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  media:
+  pgdata:
+  redisdata:

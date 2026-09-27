@@ -1,0 +1,34 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}コース編集{% endblock %}
+{% block content %}
+<h1>{{ course.title }}</h1>
+<p class="small">公開URL: <a href="/course/{{ course.slug }}" target="_blank" rel="noopener">/course/{{ course.slug }}</a></p>
+<form method="post" action="/admin/courses/{{ course.id }}" class="narrow">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <label class="field"><span>タイトル</span><input name="title" value="{{ course.title }}" required maxlength="80"></label>
+  <label class="field"><span>説明</span><textarea name="description" maxlength="500">{{ course.description }}</textarea></label>
+  <label class="check"><input type="checkbox" name="is_public" value="true" {% if course.is_public %}checked{% endif %}> 公開する</label>
+  <label class="check"><input type="checkbox" name="is_featured" value="true" {% if course.is_featured %}checked{% endif %}> トップページで紹介する</label>
+  <button type="submit" class="primary">保存</button>
+</form>
+<h2>音の並び</h2>
+<ol class="course-items">
+  {% for it in course.items %}
+  <li>
+    <span class="grow"><strong>{{ it.sound.title }}</strong> <span class="small muted">{{ it.sound.id }} ・ {{ it.sound.pref_name or '' }}{{ it.sound.city_name or '' }} ・ {{ it.sound.status }}</span>{% if it.note %}<br><span class="small">{{ it.note }}</span>{% endif %}</span>
+    <form method="post" action="/admin/courses/{{ course.id }}/items/{{ it.id }}/move"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit" name="direction" value="up" aria-label="上へ" {% if loop.first %}disabled{% endif %}><span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span></button><button type="submit" name="direction" value="down" aria-label="下へ" {% if loop.last %}disabled{% endif %}><span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span></button></form>
+    <form method="post" action="/admin/courses/{{ course.id }}/items/{{ it.id }}/delete"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit" class="danger" aria-label="削除"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button></form>
+  </li>
+  {% else %}
+  <li class="muted">まだ音がありません</li>
+  {% endfor %}
+</ol>
+<form method="post" action="/admin/courses/{{ course.id }}/items" class="filters">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <label>投稿ID または /s/… のURL<input name="sound_id" required maxlength="200"></label>
+  <label>ひとこと（任意）<input name="note" maxlength="200"></label>
+  <button type="submit" class="primary">追加</button>
+</form>
+<hr>
+<form method="post" action="/admin/courses/{{ course.id }}/delete"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit" class="danger" data-confirm="コースを削除しますか？">コースを削除</button></form>
+{% endblock %}

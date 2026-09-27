@@ -1,0 +1,14 @@
+{% extends "_page_layout.html" %}
+{% block title %}地図の出典 — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>地図の出典</h1>
+<p>本サービスの地図には、<a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener" target="_blank">国土地理院</a>の地理院タイルを使用しています。</p>
+<ul>
+  <li>標準地図・淡色地図：出典 <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener" target="_blank">国土地理院</a></li>
+  <li>写真（全国最新写真・シームレス）：出典 <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener" target="_blank">国土地理院</a></li>
+  <li>地名検索：<a href="https://msearch.gsi.go.jp/" rel="noopener" target="_blank">国土地理院 住所検索API</a></li>
+  <li>表示用住所：<a href="https://mreversegeocoder.gsi.go.jp/" rel="noopener" target="_blank">国土地理院 逆ジオコーダー</a>、市区町村コード表（地理院地図）</li>
+</ul>
+<p>地理院タイルは<a href="https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html" rel="noopener" target="_blank">国土地理院コンテンツ利用規約</a>に従って利用しています。オフライン用のタイルキャッシュは、利用者の端末内に一定量（最大500枚・7日間）だけ保存し、それを超えたものは古い順に削除します。</p>
+<p>地図ライブラリ：<a href="https://leafletjs.com/" rel="noopener" target="_blank">Leaflet</a>（BSD-2-Clause）、<a href="https://github.com/mapbox/supercluster" rel="noopener" target="_blank">Supercluster</a>（ISC）、<a href="https://github.com/Leaflet/Leaflet.heat" rel="noopener" target="_blank">Leaflet.heat</a>（BSD-2-Clause）。アイコン：Material Symbols（Apache-2.0）。</p>
+{% endblock %}

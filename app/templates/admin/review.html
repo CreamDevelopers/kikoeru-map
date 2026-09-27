@@ -1,0 +1,14 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}確認待ちキュー{% endblock %}
+{% block content %}
+<h1>確認待ちキュー <span class="muted small" id="review-remaining">残り {{ count }} 件</span></h1>
+<p class="small muted">キーボード: <kbd>A</kbd> 承認して次へ ／ <kbd>R</kbd> 却下して次へ ／ <kbd>J</kbd> または <kbd>→</kbd> スキップ ／ <kbd>Space</kbd> 再生・停止</p>
+<section id="review" class="review" aria-live="polite">
+  <p class="muted">読み込み中…</p>
+</section>
+<div class="row">
+  <button type="button" class="primary" id="review-approve">承認 (A)</button>
+  <button type="button" class="danger" id="review-reject">却下 (R)</button>
+  <button type="button" id="review-skip">スキップ (J)</button>
+</div>
+{% endblock %}

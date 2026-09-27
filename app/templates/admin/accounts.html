@@ -1,0 +1,33 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}アカウント管理{% endblock %}
+{% block content %}
+<h1>アカウント管理</h1>
+<form method="post" action="/admin/accounts" class="filters">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <label>ユーザー名<input name="username" required minlength="3" maxlength="64" pattern="[A-Za-z0-9_.\-]+" autocomplete="off"></label>
+  <label>初期パスワード（12文字以上）<input name="password" type="password" required minlength="12" autocomplete="new-password"></label>
+  <label>権限<select name="role"><option value="moderator">モデレーター</option><option value="admin">管理者</option></select></label>
+  <button type="submit" class="primary">作成</button>
+</form>
+<table class="table">
+  <thead><tr><th>ユーザー名</th><th>権限</th><th>二要素認証</th><th>状態</th><th>最終ログイン</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.username }}</td><td>{{ '管理者' if u.role == 'admin' else 'モデレーター' }}</td><td>{{ '有効' if u.totp_enabled else '未設定' }}</td>
+      <td>{{ '有効' if u.is_active else '停止中' }}</td><td class="small">{{ u.last_login_at.strftime('%Y-%m-%d %H:%M') if u.last_login_at else '-' }}</td>
+      <td class="ops">
+        {% if u.id != admin.user_id %}
+        <form method="post" action="/admin/accounts/{{ u.id }}" class="row"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+          <input type="hidden" name="role" value="{{ 'moderator' if u.role == 'admin' else 'admin' }}">
+          <button type="submit" name="op" value="role">{{ 'モデレーターにする' if u.role == 'admin' else '管理者にする' }}</button>
+          <button type="submit" name="op" value="{{ 'disable' if u.is_active else 'enable' }}" {% if u.is_active %}class="danger"{% endif %}>{{ '停止' if u.is_active else '再開' }}</button>
+          {% if u.totp_enabled %}<button type="submit" name="op" value="reset_totp" data-confirm="二要素認証をリセットしますか？">2FAリセット</button>{% endif %}
+        </form>
+        {% else %}<span class="muted small">（自分）</span>{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

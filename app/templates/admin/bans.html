@@ -1,0 +1,31 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}BAN管理{% endblock %}
+{% block content %}
+<h1>BAN管理</h1>
+<form method="post" action="/admin/bans" class="filters">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <label>対象（IPハッシュ／投稿ID／IPアドレス）<input name="target" required maxlength="128"></label>
+  <label>理由<input name="reason" maxlength="200"></label>
+  <label>日数（0=無期限）<input type="number" name="days" value="0" min="0" max="3650"></label>
+  <button type="submit" class="primary">BANする</button>
+</form>
+<p class="small muted">IPアドレスを入力した場合もハッシュ化してから保存します。</p>
+<table class="table">
+  <thead><tr><th>IPハッシュ</th><th>理由</th><th>作成</th><th>期限</th><th>状態</th><th></th></tr></thead>
+  <tbody>
+  {% for b in bans %}
+    {% set active = b.lifted_at is none and (b.expires_at is none or b.expires_at > now) %}
+    <tr>
+      <td><code>{{ b.ip_hash[:16] }}…</code></td>
+      <td>{{ b.reason }}</td>
+      <td class="small">{{ b.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td class="small">{{ b.expires_at.strftime('%Y-%m-%d %H:%M') if b.expires_at else '無期限' }}</td>
+      <td>{{ '有効' if active else ('解除済み' if b.lifted_at else '期限切れ') }}</td>
+      <td>{% if active %}<form method="post" action="/admin/bans/{{ b.id }}/lift"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit">解除</button></form>{% endif %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">BANはありません</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

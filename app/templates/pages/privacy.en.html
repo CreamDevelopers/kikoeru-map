@@ -1,0 +1,28 @@
+{% extends "_page_layout.html" %}
+{% block title %}Privacy policy — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>Privacy policy</h1>
+<p>Kikoeru Map is operated by the Kikoeru Map Project (<a href="https://www.kikoeru.org" rel="noopener" target="_blank">www.kikoeru.org</a>). The Service works without accounts and collects as little as possible.</p>
+<h2>IP addresses</h2>
+<p>IP addresses are used for abuse prevention (rate limiting, duplicate reports, bans). They are <strong>never stored in raw form</strong>; only an HMAC-SHA256 hash with a secret salt is stored, which cannot be reversed.</p>
+<h2>Location</h2>
+<ul>
+  <li>The coordinates you choose are stored and shown on the map.</li>
+  <li>With "about 100 m" / "about 500 m" blurring, coordinates are snapped to the center of a grid cell and <strong>the exact coordinates are never stored</strong>.</li>
+  <li>Your current location (from the locate button) is only used to move the map and is not sent to the server.</li>
+  <li>Display addresses (prefecture and municipality) are obtained from the stored coordinates via the GSI reverse geocoder.</li>
+</ul>
+<h2>Audio files</h2>
+<ul>
+  <li>Original file names and all embedded metadata are removed.</li>
+  <li>Posts are checked automatically (silence, voice presence, clipping, duplicates). Voice detection only estimates whether speech is present; it never transcribes content.</li>
+  <li>Deleted posts are permanently removed with their audio after 30 days. An irreversible audio fingerprint is kept to prevent re-uploads of the same sound.</li>
+</ul>
+<h2>Stored in your browser</h2>
+<p>Deletion tokens, display preferences and an offline cache are stored only on your device.</p>
+<h2>Third parties</h2>
+<ul>
+  <li>Cloudflare (delivery and Turnstile)</li>
+  <li>Geospatial Information Authority of Japan (map tiles and address search, accessed directly from your browser)</li>
+</ul>
+{% endblock %}

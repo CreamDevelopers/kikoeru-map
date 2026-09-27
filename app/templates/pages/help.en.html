@@ -1,0 +1,22 @@
+{% extends "_page_layout.html" %}
+{% block title %}How to use — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>How to use</h1>
+<h2>Listen</h2>
+<p>Tap a pin to play its sound in the bottom panel. Click or drag the waveform to seek. Numbered circles are clusters; tap to zoom in. Pins with a small mark have several sounds at the same place that you can compare.</p>
+<h2>Keyboard</h2>
+<ul>
+  <li><kbd>Space</kbd>: play / pause</li>
+  <li><kbd>←</kbd> <kbd>→</kbd>: seek 5 seconds</li>
+  <li><kbd>N</kbd>: next sound (walk mode / courses)</li>
+  <li><kbd>Esc</kbd>: close the panel</li>
+</ul>
+<h2>Walk mode</h2>
+<p>Plays random sounds one after another while the map glides to each place. Filter by region, weather, time of day, season or genre. Immersive view and a sleep timer make it great as background ambience.</p>
+<h2>Soundscape (spatial audio)</h2>
+<p>The map center is where you stand. Up to eight nearby sounds play at once, panned by direction and attenuated by distance. Drag the map to walk around. Headphones recommended.</p>
+<h2>Mimiate (guess the place)</h2>
+<p>Listen and guess where the sound was recorded. The closer, the higher the score (up to 5000 per round, 5 rounds). The daily challenge has the same rounds for everyone and a ranking.</p>
+<h2>Post</h2>
+<p>Record in the browser or choose a file, trim it, pick the place, add details and submit. Your deletion token is stored in this browser; use "My posts" in the menu to edit or delete.</p>
+{% endblock %}

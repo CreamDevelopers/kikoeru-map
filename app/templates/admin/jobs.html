@@ -1,0 +1,22 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}ジョブ監視{% endblock %}
+{% block content %}
+<h1>音声処理ジョブ</h1>
+<p>キュー待ち（arq）: {{ queued }} 件 ／
+  {% for k, v in summary.items() %}<a href="?status={{ k }}">{{ k }}: {{ v }}</a>{% if not loop.last %} ・ {% endif %}{% endfor %}
+  {% if status %} ／ <a href="/admin/jobs">すべて表示</a>{% endif %}</p>
+<table class="table">
+  <thead><tr><th>ジョブ</th><th>投稿</th><th>状態</th><th>試行</th><th>エラー</th><th>更新</th><th></th></tr></thead>
+  <tbody>
+  {% for j in jobs %}
+    <tr>
+      <td><code>{{ j.id[:10] }}</code></td><td><code>{{ j.sound_id }}</code></td><td>{{ j.status }}</td><td>{{ j.attempts }}</td>
+      <td class="small">{{ (j.error or '')[:160] }}</td><td class="small">{{ j.updated_at.strftime('%m-%d %H:%M:%S') }}</td>
+      <td>{% if j.status == 'failed' %}<form method="post" action="/admin/jobs/{{ j.id }}/retry"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit">再実行</button></form>{% endif %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="muted">ジョブはありません</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

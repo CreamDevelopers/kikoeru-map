@@ -1,0 +1,66 @@
+{% extends "_page_layout.html" %}
+{% block title %}{{ sound.title }} — {{ t('app.name') }}{% endblock %}
+{% block description %}{{ (sound.pref_name or '') ~ ' ' ~ (sound.city_name or '') }} {{ sound.comment[:120] }}{% endblock %}
+{% block head %}
+<link rel="canonical" href="{{ canonical }}">
+<meta property="og:type" content="music.song">
+<meta property="og:site_name" content="{{ t('app.name') }}">
+<meta property="og:title" content="{{ sound.title }}">
+<meta property="og:description" content="{{ (sound.pref_name or '') ~ ' ' ~ (sound.city_name or '') }} — {{ t('app.tagline') }}">
+<meta property="og:url" content="{{ canonical }}">
+{% if og_image %}<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">{% endif %}
+{% if data.m4a_url %}<meta property="og:audio" content="{{ base_url }}{{ data.m4a_url }}"><meta property="og:audio:type" content="audio/mp4">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+{% block content %}
+<article class="sound-meta" aria-labelledby="sound-title">
+  <h1 id="sound-title">{{ sound.title }}</h1>
+  <p class="muted">{{ sound.pref_name or '' }} {{ sound.city_name or '' }}</p>
+  <div id="player" class="player" data-sound='{{ data|tojson }}'></div>
+  {% if sound.comment %}<p class="sound-comment">{{ sound.comment }}</p>{% endif %}
+  <dl>
+    {% if sound.recorded_at %}<dt>{{ t('field.recorded_at') }}</dt><dd><time datetime="{{ sound.recorded_at.isoformat() }}" data-local-time>{{ sound.recorded_at.strftime('%Y-%m-%d %H:%M') }}</time></dd>{% endif %}
+    {% if sound.time_of_day %}<dt>{{ t('field.time_of_day') }}</dt><dd>{{ t('tod.' ~ sound.time_of_day) }}</dd>{% endif %}
+    {% if sound.weather %}<dt>{{ t('field.weather') }}</dt><dd>{{ t('weather.' ~ sound.weather) }}</dd>{% endif %}
+    {% if sound.season %}<dt>{{ t('field.season') }}</dt><dd>{{ t('season.' ~ sound.season) }}</dd>{% endif %}
+    <dt>{{ t('field.tags') }}</dt><dd>{% for tg in sound.tags %}<span class="chip">{{ t('tag.' ~ tg) }}</span> {% endfor %}</dd>
+    <dt>{{ t('field.license') }}</dt><dd>{{ t('license.' ~ sound.license) }}</dd>
+    <dt>{{ t('field.plays') }}</dt><dd>{{ sound.play_count }}</dd>
+    {% if sound.precision != 'exact' %}<dt>{{ t('field.precision') }}</dt><dd>{{ t('post.precision.' ~ sound.precision) }}</dd>{% endif %}
+  </dl>
+  <div class="actions">
+    <a class="btn btn-primary" href="/?s={{ sound.id }}&lat={{ sound.lat }}&lng={{ sound.lng }}&z=16"><span class="material-symbols-outlined" aria-hidden="true">map</span>{{ t('sound.open_map') }}</a>
+    <button type="button" id="share-btn"><span class="material-symbols-outlined" aria-hidden="true">share</span>{{ t('sound.share') }}</button>
+    <button type="button" id="report-btn" class="danger"><span class="material-symbols-outlined" aria-hidden="true">flag</span>{{ t('report.button') }}</button>
+  </div>
+</article>
+<dialog id="report-dialog" aria-labelledby="report-title">
+  <form method="dialog" id="report-form">
+    <div class="dialog-head">
+      <h2 id="report-title">{{ t('report.title') }}</h2>
+      <button type="button" class="icon-btn btn-ghost" data-close aria-label="{{ t('ui.close') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <div class="dialog-body">
+      <fieldset class="field">
+        <legend>{{ t('report.reason') }}</legend>
+        {% for k in ['voice','private','copyright','offensive','spam','other'] %}
+        <label class="check"><input type="radio" name="reason" value="{{ k }}" {% if loop.first %}checked{% endif %}> {{ t('report.reason.' ~ k) }}</label>
+        {% endfor %}
+      </fieldset>
+      <label class="field"><span>{{ t('report.detail') }}</span><textarea name="detail" maxlength="200"></textarea></label>
+      <div class="turnstile-box" id="report-turnstile"></div>
+      <p class="error-text" id="report-error" role="alert"></p>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" data-close>{{ t('ui.cancel') }}</button>
+      <button type="submit" class="primary" id="report-submit">{{ t('report.submit') }}</button>
+    </div>
+  </form>
+</dialog>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<script type="application/json" id="boot" nonce="{{ nonce }}">{{ to_json({'turnstile_site_key': turnstile_site_key, 'lang': lang}) }}</script>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ asset('js/sound-page.js') }}" nonce="{{ nonce }}"></script>
+{% endblock %}

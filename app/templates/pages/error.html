@@ -1,0 +1,7 @@
+{% extends "_page_layout.html" %}
+{% block title %}{{ t('error.not_found') }} — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>{{ t('error.not_found') }}</h1>
+<p>{{ t('error.not_found_body') }}</p>
+<p><a class="btn btn-primary" href="/">{{ t('error.back_to_map') }}</a></p>
+{% endblock %}

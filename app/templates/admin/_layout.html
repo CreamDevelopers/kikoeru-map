@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{% block admin_title %}管理{% endblock %} — {{ t('app.name') }} 管理画面{% endblock %}
+{% block head %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+{% block admin_head %}{% endblock %}
+{% endblock %}
+{% block body_class %}page admin{% endblock %}
+{% block body %}
+<header class="page-header admin-header">
+  <a class="brand" href="/admin"><img class="brand-icon" src="{{ asset('icons/icon-192.png') }}" alt="" width="28" height="28">管理画面</a>
+  {% if admin %}
+  <nav aria-label="管理メニュー" class="admin-nav">
+    <a href="/admin">ダッシュボード</a>
+    <a href="/admin/sounds">投稿</a>
+    <a href="/admin/review">確認待ち</a>
+    <a href="/admin/reports">通報</a>
+    <a href="/admin/bans">BAN</a>
+    <a href="/admin/ngwords">NGワード</a>
+    <a href="/admin/courses">コース</a>
+    <a href="/admin/jobs">ジョブ</a>
+    <a href="/admin/audit">監査ログ</a>
+    {% if admin.role == 'admin' %}<a href="/admin/settings">設定</a><a href="/admin/accounts">アカウント</a>{% endif %}
+    <a href="/admin/security">二要素認証</a>
+    <form method="post" action="/admin/logout" class="inline"><input type="hidden" name="csrf_token" value="{{ admin.csrf }}"><button type="submit" class="btn-ghost">ログアウト（{{ admin.username }}）</button></form>
+  </nav>
+  {% endif %}
+</header>
+<main id="main" class="admin-main">
+  {% if msg %}<p class="notice" role="status">{{ {'done':'処理しました','saved':'保存しました','not_found':'見つかりません','invalid':'入力が正しくありません','invalid_regex':'正規表現が正しくありません','slug_taken':'そのスラッグは使われています','invalid_slug':'スラッグは英小文字・数字・ハイフンで入力してください','sound_not_found':'公開中の投稿が見つかりません','cannot_retry':'再実行できないジョブです','upload_missing':'アップロードファイルが残っていないため再実行できません','invalid_code':'確認コードが正しくありません','totp_enabled':'二要素認証を有効にしました','totp_disabled':'二要素認証を無効にしました','invalid_password':'現在のパスワードが正しくありません','password_changed':'パスワードを変更しました','username_taken':'そのユーザー名は使われています','invalid_role':'権限が正しくありません','cannot_change_self':'自分自身には実行できません'}.get(msg, msg) }}</p>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+{% endblock %}
+{% block scripts %}
+{% if admin %}<script type="application/json" id="admin-boot" nonce="{{ nonce }}">{{ to_json({'csrf': admin.csrf, 'role': admin.role}) }}</script>{% endif %}
+{% block admin_scripts %}{% endblock %}
+<script type="module" src="{{ asset('js/admin.js') }}" nonce="{{ nonce }}"></script>
+{% endblock %}

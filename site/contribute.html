@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>開発に参加 — きこえる地図プロジェクト</title>
+  <meta name="description" content="きこえる地図はオープンソースで開発しています。参加のしかた、技術スタック、開発環境の立ち上げ方、Issue と Pull Request の流れ。">
+  <meta name="theme-color" content="#1ab3a0">
+  <link rel="canonical" href="https://www.kikoeru.org/contribute.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="きこえる地図プロジェクト">
+  <meta property="og:title" content="開発に参加 — きこえる地図プロジェクト">
+  <meta property="og:url" content="https://www.kikoeru.org/contribute.html">
+  <meta property="og:image" content="https://www.kikoeru.org/assets/kikoeru-logo.png">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <script src="js/theme-init.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へ移動</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="header-logo logo-plate" aria-label="きこえる地図プロジェクト トップ"><img src="assets/kikoeru-logo.png" alt="きこえる地図プロジェクト" width="150" height="45"></a>
+      <button type="button" class="icon-button menu-button" id="menu-button" aria-controls="site-nav" aria-expanded="false" aria-label="メニュー"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <nav id="site-nav" class="header-nav" aria-label="メインメニュー">
+        <a href="about.html">プロジェクトについて</a>
+        <a href="features.html">できること</a>
+        <a href="guide.html">使い方</a>
+        <a href="contribute.html">開発に参加</a>
+        <a href="sponsors.html">スポンサー</a>
+        <a href="faq.html">よくある質問</a>
+      </nav>
+      <button type="button" class="icon-button" id="theme-button" aria-label="テーマ"></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <p class="eyebrow">OPEN SOURCE</p>
+        <h1>開発に参加</h1>
+        <p>きこえる地図はオープンソースソフトウェアです。コードを書く人も、書かない人も、いろいろな形で参加できます。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container with-toc">
+        <div data-toc>
+          <h2 id="repository">リポジトリ</h2>
+          <p>ソースコード、課題（Issues）、変更の提案（Pull Requests）は、すべて GitHub で公開しています。ライセンスなどの詳細はリポジトリをご覧ください。</p>
+          <a class="repo" href="https://github.com/CreamDevelopers/kikoeru-map" rel="noopener">
+            <span class="repo-label">GitHub リポジトリ</span>
+            <span class="repo-name">CreamDevelopers/kikoeru-map</span>
+          </a>
+
+          <h2 id="ways">参加のかたち</h2>
+          <ul class="cards">
+            <li class="card"><h3>音を投稿する</h3><p>あなたの街の音を地図に置くことが、いちばん大きな貢献です。</p></li>
+            <li class="card"><h3>不具合を報告する</h3><p>おかしな動きを見つけたら、再現手順と環境を添えて Issue を立ててください。</p></li>
+            <li class="card"><h3>アイデアを出す</h3><p>「こんな機能があったら」「ここが使いにくい」という声も Issue で歓迎します。</p></li>
+            <li class="card"><h3>コードを書く</h3><p>機能の追加や改善、テストの追加など、Pull Request をお待ちしています。</p></li>
+            <li class="card"><h3>翻訳する</h3><p>画面の文言は辞書ファイル（<code>app/i18n/*.json</code>）で管理しています。表現の改善も歓迎します。</p></li>
+            <li class="card"><h3>ドキュメントを書く</h3><p>使い方や開発手順の説明をわかりやすくするのも、大切な貢献です。</p></li>
+          </ul>
+
+          <h2 id="stack">技術スタック</h2>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><th scope="row">バックエンド</th><td>Python 3.12 / FastAPI / SQLAlchemy 2（async）/ Alembic / Pydantic v2</td></tr>
+                <tr><th scope="row">アプリサーバー</th><td>gunicorn + uvicorn worker</td></tr>
+                <tr><th scope="row">データベース</th><td>PostgreSQL 16 + PostGIS</td></tr>
+                <tr><th scope="row">キャッシュ・キュー</th><td>Redis 7 / arq（バックグラウンドジョブ）</td></tr>
+                <tr><th scope="row">音声処理</th><td>ffmpeg / ffprobe / webrtcvad / numpy / Chromaprint（fpcalc）</td></tr>
+                <tr><th scope="row">フロントエンド</th><td>Jinja2 テンプレート + Vanilla JS（ES モジュール、ビルド工程なし）/ Web Audio API</td></tr>
+                <tr><th scope="row">地図</th><td>Leaflet / Supercluster / 国土地理院タイル</td></tr>
+                <tr><th scope="row">公開</th><td>Docker Compose / Cloudflare Tunnel / Cloudflare Turnstile</td></tr>
+                <tr><th scope="row">品質</th><td>pytest / ruff / mypy</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 id="setup">開発環境を立ち上げる</h2>
+          <p>必要なのは Docker（Compose v2）だけです。</p>
+          <div class="code"><pre><code>git clone https://github.com/CreamDevelopers/kikoeru-map.git
+cd kikoeru-map
+cp .env.example .env</code></pre></div>
+          <p><code>.env</code> の中の DB パスワードや <code>IP_HASH_SALT</code>、<code>SESSION_SECRET</code> を自分用の値に変更してから、ビルドして起動します。</p>
+          <div class="code"><pre><code>docker compose build
+docker compose up -d
+docker compose ps</code></pre></div>
+          <p>すべてのサービスが <code>healthy</code> になれば準備完了です。開発用の Turnstile には Cloudflare 公式のテスト用キーが設定されています。管理画面を使うときは、管理者アカウントを作成します。</p>
+          <div class="code"><pre><code>docker compose exec app python -m app.cli create-admin --username yourname --role admin</code></pre></div>
+
+          <h2 id="test">テストと静的解析</h2>
+          <p>変更を送る前に、テストと静的解析（ruff・mypy）が通ることを確認してください。</p>
+          <div class="code"><pre><code>docker compose -f docker-compose.yml -f docker-compose.test.yml --profile test run --rm test</code></pre></div>
+
+          <h2 id="flow">Issue と Pull Request の流れ</h2>
+          <ol class="steps">
+            <li><strong>Issue で相談する</strong>大きな変更は、先に Issue で方針を相談してもらえるとスムーズです。小さな修正はそのまま Pull Request でもかまいません。</li>
+            <li><strong>ブランチを作って変更する</strong>リポジトリをフォークし、変更ごとにブランチを分けてください。</li>
+            <li><strong>テストを追加・実行する</strong>振る舞いを変えたときは、それを確かめるテストも一緒にお願いします。</li>
+            <li><strong>Pull Request を送る</strong>何を・なぜ変えたのかを説明に書いてください。画面の変更はスクリーンショットがあると助かります。</li>
+            <li><strong>レビュー</strong>メンテナーが確認し、必要に応じてやりとりしながら取り込みます。</li>
+          </ol>
+
+          <h2 id="principles">大切にしてほしいこと</h2>
+          <ul class="list">
+            <li><strong>プライバシーを守る</strong> — 投稿者や閲覧者の個人情報を集めたり、外部に送ったりする変更は慎重に扱います。</li>
+            <li><strong>誰でも使えるように</strong> — キーボード操作、スクリーンリーダー、小さな画面、遅い回線でも使えることを意識してください。</li>
+            <li><strong>地図データの利用規約を守る</strong> — 国土地理院のタイルや API は、それぞれの利用規約の範囲で利用しています。</li>
+            <li><strong>お互いに敬意を</strong> — 立場や経験にかかわらず、気持ちよく議論できる場にしましょう。</li>
+          </ul>
+        </div>
+        <nav class="toc" id="toc" aria-label="このページの内容"></nav>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo-plate"><img src="assets/kikoeru-logo.png" alt="きこえる地図プロジェクト" width="160" height="48" loading="lazy"></span>
+          <p>音だけで、場所を旅する。日本各地の環境音を地図に残すオープンソースプロジェクトです。</p>
+        </div>
+        <div class="footer-col">
+          <h2>プロジェクト</h2>
+          <ul>
+            <li><a href="about.html">プロジェクトについて</a></li>
+            <li><a href="features.html">できること</a></li>
+            <li><a href="guide.html">使い方</a></li>
+            <li><a href="faq.html">よくある質問</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>参加する</h2>
+          <ul>
+            <li><a href="https://map.kikoeru.org/">きこえる地図をひらく</a></li>
+            <li><a href="contribute.html">開発に参加</a></li>
+            <li><a href="https://github.com/CreamDevelopers/kikoeru-map" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/CreamDevelopers/kikoeru-map/issues" rel="noopener">Issues</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>スポンサー</h2>
+          <ul>
+            <li><a href="sponsors.html">スポンサーについて</a></li>
+            <li><a href="https://www.creamgroup.net" rel="noopener">CreamDevelopers</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; きこえる地図プロジェクト</p>
+        <p>地図データ: <a href="https://maps.gsi.go.jp/development/ichiran.html" rel="noopener">国土地理院</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

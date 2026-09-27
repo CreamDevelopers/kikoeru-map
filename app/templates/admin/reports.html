@@ -1,0 +1,28 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}通報キュー{% endblock %}
+{% block content %}
+<h1>通報キュー</h1>
+{% for g in groups %}
+<article class="report-group">
+  <h2>{{ g.sound.title }} <span class="small muted">{{ g.sound.id }} ・ {{ g.sound.status }} ・ 通報 {{ g.count }} 件（重み {{ g.weight }}）</span></h2>
+  <div class="row">
+    {% if g.sound.m4a_hash %}<audio controls preload="none" src="/media/{{ g.sound.id }}/{{ g.sound.m4a_hash }}.m4a"></audio>{% endif %}
+    {% if g.sound.spectrogram_hash %}<img class="spectrogram small-spec" loading="lazy" alt="スペクトログラム" src="/media/{{ g.sound.id }}/{{ g.sound.spectrogram_hash }}.png">{% endif %}
+  </div>
+  <p class="small">{{ g.sound.comment }}</p>
+  <ul class="small">
+    {% for r in g.reports %}<li>{{ t('report.reason.' ~ r.reason) }}{% if r.detail %}：{{ r.detail }}{% endif %} <span class="muted">（{{ r.created_at.strftime('%m-%d %H:%M') }}・重み {{ '%.2f'|format(r.weight) }}）</span></li>{% endfor %}
+  </ul>
+  <form method="post" action="/admin/reports/{{ g.sound.id }}/resolve" class="row">
+    <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+    <button type="submit" name="decision" value="ok">問題なし（公開に戻す）</button>
+    <button type="submit" name="decision" value="hide">非公開</button>
+    <button type="submit" name="decision" value="delete" class="danger" data-confirm="削除しますか？">削除</button>
+    <label class="inline-field">BAN日数（0=無期限）<input type="number" name="ban_days" value="0" min="0" max="3650"></label>
+    <button type="submit" name="decision" value="ban" class="danger" data-confirm="投稿を削除し、投稿者をBANしますか？">投稿者をBAN</button>
+  </form>
+</article>
+{% else %}
+<p class="muted">未対応の通報はありません</p>
+{% endfor %}
+{% endblock %}

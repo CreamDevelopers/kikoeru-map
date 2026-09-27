@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% block body_class %}app{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ cdn.leaflet_css[0] }}" integrity="{{ cdn.leaflet_css[1] }}" crossorigin="anonymous">
+{% endblock %}
+{% block body %}
+<header class="topbar">
+  <a class="brand" href="/" aria-label="{{ t('app.name') }}"><img class="brand-icon" src="{{ asset('icons/icon-192.png') }}" alt="" width="28" height="28"><span class="brand-text">{{ t('app.name') }}</span></a>
+  <div class="search" role="search">
+    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+    <label class="visually-hidden" for="search-input">{{ t('search.label') }}</label>
+    <input id="search-input" type="search" autocomplete="off" placeholder="{{ t('search.placeholder') }}"
+           role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+    <ul id="search-results" class="search-results" role="listbox" hidden></ul>
+  </div>
+  <button type="button" class="icon-btn btn-ghost" id="menu-btn" aria-label="{{ t('nav.menu') }}" aria-haspopup="true" aria-controls="drawer" aria-expanded="false">
+    <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+  </button>
+</header>
+
+<main id="main">
+  <div id="map" role="application" aria-label="{{ t('map.label') }}"></div>
+  <div id="listener-mark" class="listener-mark" hidden aria-hidden="true"></div>
+</main>
+
+<div class="map-tools" role="toolbar" aria-label="{{ t('map.tools') }}">
+  <button type="button" id="layer-btn" aria-haspopup="true" aria-expanded="false" aria-label="{{ t('map.layers') }}" title="{{ t('map.layers') }}">
+    <span class="material-symbols-outlined" aria-hidden="true">layers</span>
+  </button>
+  <div id="layer-menu" class="layer-menu" role="menu" hidden>
+    <button type="button" role="menuitemradio" data-layer="pale" aria-checked="true">{{ t('map.layer.pale') }}</button>
+    <button type="button" role="menuitemradio" data-layer="std" aria-checked="false">{{ t('map.layer.std') }}</button>
+    <button type="button" role="menuitemradio" data-layer="photo" aria-checked="false">{{ t('map.layer.photo') }}</button>
+  </div>
+  <button type="button" id="heat-btn" class="toggle" aria-pressed="false" aria-label="{{ t('map.heat') }}" title="{{ t('map.heat') }}">
+    <span class="material-symbols-outlined" aria-hidden="true">blur_on</span>
+  </button>
+  <button type="button" id="locate-btn" aria-label="{{ t('map.locate') }}" title="{{ t('map.locate') }}">
+    <span class="material-symbols-outlined" aria-hidden="true">my_location</span>
+  </button>
+</div>
+
+<nav class="dock" aria-label="{{ t('nav.modes') }}">
+  <button type="button" data-mode="walk" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">directions_walk</span>{{ t('mode.walk') }}</button>
+  <button type="button" data-mode="spatial" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">spatial_audio</span>{{ t('mode.spatial') }}</button>
+  <button type="button" data-mode="game" aria-pressed="false"><span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>{{ t('mode.game') }}</button>
+  <button type="button" class="post-btn" id="post-btn"><span class="material-symbols-outlined" aria-hidden="true">mic</span>{{ t('mode.post') }}</button>
+</nav>
+
+<section id="sheet" class="sheet" aria-labelledby="sheet-title" hidden>
+  <div class="sheet-grip" aria-hidden="true"></div>
+  <div class="sheet-head">
+    <h2 id="sheet-title"></h2>
+    <button type="button" class="icon-btn btn-ghost" id="sheet-collapse" aria-label="{{ t('ui.collapse') }}" aria-expanded="true"><span class="material-symbols-outlined" aria-hidden="true">expand_more</span></button>
+    <button type="button" class="icon-btn btn-ghost" id="sheet-close" aria-label="{{ t('ui.close') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+  </div>
+  <div class="sheet-body" id="sheet-body" tabindex="-1"></div>
+</section>
+
+<div id="backdrop" class="backdrop" hidden></div>
+<aside id="drawer" class="drawer" hidden aria-label="{{ t('nav.menu') }}">
+  <nav>
+    <a href="/list/new"><span class="material-symbols-outlined" aria-hidden="true">new_releases</span>{{ t('nav.new') }}</a>
+    <a href="/list/popular"><span class="material-symbols-outlined" aria-hidden="true">trending_up</span>{{ t('nav.popular') }}</a>
+    <a href="/list/prefs"><span class="material-symbols-outlined" aria-hidden="true">map</span>{{ t('nav.prefs') }}</a>
+    <button type="button" id="courses-btn"><span class="material-symbols-outlined" aria-hidden="true">route</span>{{ t('nav.courses') }}</button>
+    <button type="button" id="mine-btn"><span class="material-symbols-outlined" aria-hidden="true">library_music</span>{{ t('nav.mine') }}</button>
+    <button type="button" id="theme-btn"><span class="material-symbols-outlined" aria-hidden="true">contrast</span><span id="theme-label">{{ t('nav.theme') }}</span></button>
+    <a href="?lang={{ 'en' if lang == 'ja' else 'ja' }}" hreflang="{{ 'en' if lang == 'ja' else 'ja' }}"><span class="material-symbols-outlined" aria-hidden="true">translate</span>{{ t('nav.lang_switch') }}</a>
+    <a href="/about/help"><span class="material-symbols-outlined" aria-hidden="true">help</span>{{ t('nav.help') }}</a>
+    <a href="/about/guidelines"><span class="material-symbols-outlined" aria-hidden="true">rule</span>{{ t('nav.guidelines') }}</a>
+    <a href="/about/terms"><span class="material-symbols-outlined" aria-hidden="true">gavel</span>{{ t('nav.terms') }}</a>
+    <a href="/about/privacy"><span class="material-symbols-outlined" aria-hidden="true">shield</span>{{ t('nav.privacy') }}</a>
+    <a href="/about/attribution"><span class="material-symbols-outlined" aria-hidden="true">info</span>{{ t('nav.attribution') }}</a>
+  </nav>
+  {% include "_operator.html" %}
+</aside>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<dialog id="post-dialog" class="full" aria-labelledby="post-title">
+  <div class="dialog-head">
+    <h2 id="post-title">{{ t('post.title') }}</h2>
+    <button type="button" class="icon-btn btn-ghost" data-close aria-label="{{ t('ui.close') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+  </div>
+  <div class="dialog-body">
+    <ol class="steps" aria-hidden="true"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
+    <p class="visually-hidden" id="post-step-label" aria-live="polite"></p>
+
+    <section data-step="source">
+      <h3>{{ t('post.step.source') }}</h3>
+      <div class="stack">
+        <div class="rec-time" id="rec-time" aria-live="off">0:00 / 1:00</div>
+        <canvas class="rec-canvas" id="rec-canvas" aria-hidden="true"></canvas>
+        <div>
+          <span class="small muted" id="rec-level-label">{{ t('post.level') }}</span>
+          <div class="meter" role="meter" aria-labelledby="rec-level-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="rec-meter"><div></div></div>
+        </div>
+        <div class="row" style="justify-content:center">
+          <button type="button" class="rec-btn" id="rec-btn" aria-label="{{ t('post.record') }}"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>
+        </div>
+        <p class="small muted" id="rec-hint">{{ t('post.record_hint') }}</p>
+        <hr>
+        <label class="field"><span>{{ t('post.or_file') }}</span>
+          <input type="file" id="file-input" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.oga,.opus,.webm,.flac,.caf,.aiff">
+        </label>
+        <p class="small muted">{{ t('post.file_hint') }}</p>
+      </div>
+    </section>
+
+    <section data-step="trim" hidden>
+      <h3>{{ t('post.step.trim') }}</h3>
+      <div class="trim" id="trim">
+        <canvas id="trim-canvas" aria-hidden="true"></canvas>
+        <div class="shade" id="trim-shade-l"></div>
+        <div class="shade" id="trim-shade-r"></div>
+        <button type="button" class="handle" id="trim-start" role="slider" aria-label="{{ t('post.trim_start') }}" aria-valuemin="0" aria-valuenow="0"></button>
+        <button type="button" class="handle" id="trim-end" role="slider" aria-label="{{ t('post.trim_end') }}" aria-valuemin="0" aria-valuenow="0"></button>
+      </div>
+      <p class="row small"><span id="trim-info" class="muted"></span></p>
+      <div class="row">
+        <button type="button" id="trim-play"><span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>{{ t('post.preview') }}</button>
+        <button type="button" id="trim-reset">{{ t('post.trim_reset') }}</button>
+      </div>
+      <p class="small muted">{{ t('post.trim_hint') }}</p>
+    </section>
+
+    <section data-step="place" hidden>
+      <h3>{{ t('post.step.place') }}</h3>
+      <p class="small muted">{{ t('post.place_hint') }}</p>
+      <div class="minimap" id="post-map"></div>
+      <div class="row" style="margin-top:8px">
+        <button type="button" id="post-locate"><span class="material-symbols-outlined" aria-hidden="true">my_location</span>{{ t('post.use_location') }}</button>
+        <span class="small muted" id="post-coords"></span>
+      </div>
+      <fieldset class="field">
+        <legend>{{ t('post.precision') }}</legend>
+        <label class="check"><input type="radio" name="precision" value="exact" checked> {{ t('post.precision.exact') }}</label>
+        <label class="check"><input type="radio" name="precision" value="100m"> {{ t('post.precision.100m') }}</label>
+        <label class="check"><input type="radio" name="precision" value="500m"> {{ t('post.precision.500m') }}</label>
+        <p class="small muted">{{ t('post.precision_hint') }}</p>
+      </fieldset>
+    </section>
+
+    <section data-step="details" hidden>
+      <h3>{{ t('post.step.details') }}</h3>
+      <label class="field"><span>{{ t('field.title') }} *</span><input id="f-title" maxlength="40" required></label>
+      <label class="field"><span>{{ t('field.comment') }}</span><textarea id="f-comment" maxlength="200"></textarea></label>
+      <label class="field"><span>{{ t('field.recorded_at') }}</span><input id="f-recorded" type="datetime-local"></label>
+      <div class="row">
+        <label class="field grow"><span>{{ t('field.time_of_day') }}</span>
+          <select id="f-tod">
+            {% for k in ['early_morning','morning','noon','evening','night','late_night'] %}<option value="{{ k }}">{{ t('tod.' ~ k) }}</option>{% endfor %}
+          </select></label>
+        <label class="field grow"><span>{{ t('field.season') }}</span>
+          <select id="f-season">
+            {% for k in ['spring','summer','autumn','winter'] %}<option value="{{ k }}">{{ t('season.' ~ k) }}</option>{% endfor %}
+          </select></label>
+      </div>
+      <div class="row">
+        <label class="field grow"><span>{{ t('field.weather') }}</span>
+          <select id="f-weather">
+            <option value="">{{ t('ui.unspecified') }}</option>
+            {% for k in ['sunny','cloudy','rain','snow','wind'] %}<option value="{{ k }}">{{ t('weather.' ~ k) }}</option>{% endfor %}
+          </select></label>
+        <label class="field grow"><span>{{ t('field.direction') }}</span>
+          <select id="f-direction">
+            <option value="">{{ t('ui.unspecified') }}</option>
+            {% for i in range(8) %}<option value="{{ i }}">{{ t('dir.' ~ i) }}</option>{% endfor %}
+          </select></label>
+      </div>
+      <fieldset class="field">
+        <legend>{{ t('field.tags') }}</legend>
+        <div class="chips">
+          {% for k in ['nature','city','transit','shop','water','festival','other'] %}
+          <label class="chip"><input type="checkbox" name="tags" value="{{ k }}"> <span>{{ t('tag.' ~ k) }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    </section>
+
+    <section data-step="license" hidden>
+      <h3>{{ t('post.step.license') }}</h3>
+      <fieldset class="field">
+        <legend>{{ t('field.license') }}</legend>
+        <label class="check"><input type="radio" name="license" value="cc-by" checked> {{ t('license.cc-by') }}</label>
+        <label class="check"><input type="radio" name="license" value="cc-by-nc"> {{ t('license.cc-by-nc') }}</label>
+        <label class="check"><input type="radio" name="license" value="arr"> {{ t('license.arr') }}</label>
+      </fieldset>
+      <div class="notice">
+        <p>{{ t('post.guideline_summary') }}</p>
+        <p><a href="/about/guidelines" target="_blank" rel="noopener">{{ t('nav.guidelines') }}</a></p>
+      </div>
+      <label class="check"><input type="checkbox" id="f-agree"> {{ t('post.agree') }}</label>
+      <div class="turnstile-box" id="post-turnstile"></div>
+      <p class="error-text" id="post-error" role="alert"></p>
+    </section>
+
+    <section data-step="progress" hidden>
+      <h3>{{ t('post.step.progress') }}</h3>
+      <div class="progress" aria-hidden="true"><div id="upload-bar"></div></div>
+      <ul class="status-list" id="post-status">
+        <li data-s="upload"><span class="material-symbols-outlined" aria-hidden="true">upload</span>{{ t('post.status.upload') }}</li>
+        <li data-s="processing"><span class="material-symbols-outlined" aria-hidden="true">graphic_eq</span>{{ t('post.status.processing') }}</li>
+        <li data-s="done"><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>{{ t('post.status.published') }}</li>
+      </ul>
+      <div id="post-result" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" id="post-back">{{ t('ui.back') }}</button>
+    <button type="button" class="primary" id="post-next">{{ t('ui.next') }}</button>
+  </div>
+</dialog>
+
+<dialog id="report-dialog" aria-labelledby="report-title">
+  <form method="dialog" id="report-form">
+    <div class="dialog-head">
+      <h2 id="report-title">{{ t('report.title') }}</h2>
+      <button type="button" class="icon-btn btn-ghost" data-close aria-label="{{ t('ui.close') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <div class="dialog-body">
+      <fieldset class="field">
+        <legend>{{ t('report.reason') }}</legend>
+        {% for k in ['voice','private','copyright','offensive','spam','other'] %}
+        <label class="check"><input type="radio" name="reason" value="{{ k }}" {% if loop.first %}checked{% endif %}> {{ t('report.reason.' ~ k) }}</label>
+        {% endfor %}
+      </fieldset>
+      <label class="field"><span>{{ t('report.detail') }}</span><textarea name="detail" maxlength="200"></textarea></label>
+      <div class="turnstile-box" id="report-turnstile"></div>
+      <p class="error-text" id="report-error" role="alert"></p>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" data-close>{{ t('ui.cancel') }}</button>
+      <button type="submit" class="primary" id="report-submit">{{ t('report.submit') }}</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="mine-dialog" class="full" aria-labelledby="mine-title">
+  <div class="dialog-head">
+    <h2 id="mine-title">{{ t('nav.mine') }}</h2>
+    <button type="button" class="icon-btn btn-ghost" data-close aria-label="{{ t('ui.close') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+  </div>
+  <div class="dialog-body" id="mine-body"></div>
+  <div class="dialog-foot"><span class="small muted">{{ t('mine.hint') }}</span><button type="button" data-close>{{ t('ui.close') }}</button></div>
+</dialog>
+
+<dialog id="rank-dialog" aria-labelledby="rank-title">
+  <form method="dialog" id="rank-form">
+    <div class="dialog-head">
+      <h2 id="rank-title">{{ t('game.submit_ranking') }}</h2>
+      <button type="button" class="icon-btn btn-ghost" data-close aria-label="{{ t('ui.close') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <div class="dialog-body">
+      <label class="field"><span>{{ t('game.nickname') }}</span><input name="nickname" maxlength="20" required></label>
+      <div class="turnstile-box" id="rank-turnstile"></div>
+      <p class="error-text" id="rank-error" role="alert"></p>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" data-close>{{ t('ui.cancel') }}</button>
+      <button type="submit" class="primary">{{ t('game.submit') }}</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="application/json" id="boot" nonce="{{ nonce }}">{{ to_json(dict(boot, turnstile_site_key=turnstile_site_key, regions=regions, lang=lang)) }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ cdn.leaflet_js[0] }}" integrity="{{ cdn.leaflet_js[1] }}" crossorigin="anonymous" nonce="{{ nonce }}"></script>
+<script src="{{ cdn.supercluster_js[0] }}" integrity="{{ cdn.supercluster_js[1] }}" crossorigin="anonymous" nonce="{{ nonce }}"></script>
+<script src="{{ cdn.leaflet_heat_js[0] }}" integrity="{{ cdn.leaflet_heat_js[1] }}" crossorigin="anonymous" nonce="{{ nonce }}"></script>
+<script type="module" src="{{ asset('js/main.js') }}" nonce="{{ nonce }}"></script>
+{% endblock %}

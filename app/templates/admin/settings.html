@@ -1,0 +1,21 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}設定{% endblock %}
+{% block content %}
+<h1>設定</h1>
+{% if error %}<p class="notice warn" role="alert">入力値が範囲外です</p>{% endif %}
+<form method="post" action="/admin/settings" class="narrow">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <h2>投稿</h2>
+  <label class="check"><input type="checkbox" name="posting_paused" {% if s.posting_paused %}checked{% endif %}> 投稿を一時停止する（荒らし発生時用）</label>
+  <label class="check"><input type="checkbox" name="preapproval" {% if s.preapproval %}checked{% endif %}> 事前承認モード（すべての投稿を確認待ちにする）</label>
+  <label class="field"><span>最大録音秒数（10〜60）</span><input type="number" name="max_duration_sec" min="10" max="60" value="{{ s.max_duration_sec }}"></label>
+  <h2>自動チェック・通報</h2>
+  <label class="field"><span>人の声の検出しきい値（0.05〜1.0、含有率がこれ以上なら確認待ち）</span><input type="number" step="0.01" name="vad_threshold" min="0.05" max="1" value="{{ s.vad_threshold }}"></label>
+  <label class="field"><span>自動非公開にする通報数のしきい値（信頼度で重み付け）</span><input type="number" step="0.1" name="report_threshold" min="1" max="100" value="{{ s.report_threshold }}"></label>
+  <h2>レート制限（IPハッシュ単位）</h2>
+  <label class="field"><span>投稿（1時間あたり）</span><input type="number" name="rate_post_per_hour" min="1" max="1000" value="{{ s.rate_post_per_hour }}"></label>
+  <label class="field"><span>通報（1時間あたり）</span><input type="number" name="rate_report_per_hour" min="1" max="1000" value="{{ s.rate_report_per_hour }}"></label>
+  <label class="field"><span>ピン一覧API（1分あたり）</span><input type="number" name="rate_pins_per_minute" min="10" max="10000" value="{{ s.rate_pins_per_minute }}"></label>
+  <button type="submit" class="primary">保存</button>
+</form>
+{% endblock %}

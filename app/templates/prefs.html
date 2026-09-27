@@ -1,0 +1,13 @@
+{% extends "_page_layout.html" %}
+{% block title %}{{ t('list.prefs') }} — {{ t('app.name') }}{% endblock %}
+{% block content %}
+<h1>{{ t('list.prefs') }}</h1>
+{% for rid, names in regions.items() %}
+<h2>{{ names[0] if lang == 'ja' else names[1] }}</h2>
+<ul class="pref-grid">
+  {% for p in prefs if p.region == rid %}
+  <li><a href="/list/pref/{{ p.code }}"><span>{{ p.ja if lang == 'ja' else p.en }}</span><span class="muted">{{ counts.get(p.code, 0) }}</span></a></li>
+  {% endfor %}
+</ul>
+{% endfor %}
+{% endblock %}

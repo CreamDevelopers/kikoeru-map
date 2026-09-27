@@ -1,0 +1,22 @@
+{% extends "admin/_layout.html" %}
+{% block admin_title %}コース管理{% endblock %}
+{% block content %}
+<h1>散歩コース</h1>
+<form method="post" action="/admin/courses" class="filters">
+  <input type="hidden" name="csrf_token" value="{{ admin.csrf }}">
+  <label>スラッグ（URL用）<input name="slug" required pattern="[a-z0-9][a-z0-9-]{1,62}" maxlength="64" placeholder="kyoto-autumn"></label>
+  <label>タイトル<input name="title" required maxlength="80"></label>
+  <button type="submit" class="primary">作成</button>
+</form>
+<table class="table">
+  <thead><tr><th>タイトル</th><th>スラッグ</th><th>音の数</th><th>公開</th><th>注目</th></tr></thead>
+  <tbody>
+  {% for c in courses %}
+    <tr><td><a href="/admin/courses/{{ c.id }}">{{ c.title }}</a></td><td><code>{{ c.slug }}</code></td><td>{{ counts.get(c.id, 0) }}</td>
+      <td>{{ '公開' if c.is_public else '非公開' }}</td><td>{{ '注目' if c.is_featured else '' }}</td></tr>
+  {% else %}
+    <tr><td colspan="5" class="muted">コースはありません</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
