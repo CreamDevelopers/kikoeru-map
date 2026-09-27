@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     geocoder_url: str = "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress"
     geocoder_enabled: bool = True
 
+    # Android アプリ（TWA）のドメイン検証用。Play アプリ署名を使うときはその指紋もカンマ区切りで足す
+    android_package: str = "org.kikoeru.map"
+    android_cert_sha256: str = ""
+
     @property
     def is_dev(self) -> bool:
         return self.env in {"development", "test"}

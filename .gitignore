@@ -8,3 +8,12 @@ __pycache__/
 .ruff_cache/
 *.dump
 *.tar.gz
+
+# Android（署名鍵とビルド成果物は Git に入れない）
+android/keystore/
+android/keystore.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/dist/
+android/local.properties

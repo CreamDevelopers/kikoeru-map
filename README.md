@@ -292,6 +292,19 @@ docker run --rm -u "$(id -u)" -v "$PWD:/w" --entrypoint python kikoeru-app:lates
   /w/scripts/make_icons.py /w/app/static/icons
 ```
 
+### Android アプリ（TWA）
+
+`android/` は Web 版を Chrome の全画面タブで開く TWA（Trusted Web Activity）アプリです。Java や Android SDK は Docker の中に入れるので、ホストには Docker だけあればビルドできます。
+
+```bash
+android/build.sh 1.0.0 1   # versionName versionCode
+```
+
+- 成果物は `android/dist/` に出ます。端末に直接入れるときは `.apk`、Google Play に出すときは `.aab` を使います。
+- 初回のビルドで署名鍵 `android/keystore/release.jks` とパスワード入りの `android/keystore.properties` を作ります。どちらも Git には入りません。**失くすと同じアプリとして更新できなくなるので、必ず別の場所にバックアップしてください。**
+- ビルドの最後に表示される SHA-256 を `.env` の `ANDROID_CERT_SHA256` に設定して再起動すると、`/.well-known/assetlinks.json` で検証が通り、アプリ上部のアドレスバーが消えます。Google Play のアプリ署名を使う場合は、Play Console に表示される SHA-256 もカンマ区切りで追加します。
+- 更新時は versionCode を毎回増やしてビルドします（例: `android/build.sh 1.0.1 2`）。
+
 ## ディレクトリ構成
 
 ```

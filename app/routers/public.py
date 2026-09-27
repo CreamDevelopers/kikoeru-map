@@ -238,6 +238,31 @@ async def manifest(request: Request) -> Response:
     )
 
 
+@router.get("/.well-known/assetlinks.json")
+async def assetlinks() -> Response:
+    settings = get_settings()
+    fingerprints = [f.strip().upper() for f in settings.android_cert_sha256.split(",") if f.strip()]
+    data = (
+        [
+            {
+                "relation": ["delegate_permission/common.handle_all_urls"],
+                "target": {
+                    "namespace": "android_app",
+                    "package_name": settings.android_package,
+                    "sha256_cert_fingerprints": fingerprints,
+                },
+            }
+        ]
+        if fingerprints
+        else []
+    )
+    return Response(
+        orjson.dumps(data),
+        media_type="application/json",
+        headers={"Cache-Control": "public, max-age=3600", "Access-Control-Allow-Origin": "*"},
+    )
+
+
 @router.get("/robots.txt")
 async def robots() -> PlainTextResponse:
     return PlainTextResponse("User-agent: *\nDisallow: /admin\nDisallow: /api/\n")
