@@ -57,6 +57,36 @@ export function wireDialog(dialog) {
   });
 }
 
+// ブラウザ標準の confirm() の代わり。OK なら true、キャンセルや Esc・背景クリックなら false で解決する
+export function confirmDialog(message, { ok = "OK", cancel = "キャンセル", danger = false } = {}) {
+  return new Promise((resolve) => {
+    const okBtn = h("button", { type: "button", class: danger ? "danger" : "btn-primary" }, ok);
+    const cancelBtn = h("button", { type: "button" }, cancel);
+    const dialog = h(
+      "dialog",
+      { class: "confirm-dialog", "aria-labelledby": "confirm-dialog-msg" },
+      h("p", { id: "confirm-dialog-msg" }, message),
+      h("div", { class: "confirm-actions" }, cancelBtn, okBtn),
+    );
+    let result = false;
+    okBtn.addEventListener("click", () => {
+      result = true;
+      dialog.close();
+    });
+    cancelBtn.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+      dialog.remove();
+      resolve(result);
+    });
+    document.body.append(dialog);
+    dialog.showModal();
+    (danger ? cancelBtn : okBtn).focus();
+  });
+}
+
 export function boot() {
   try {
     return JSON.parse(document.getElementById("boot")?.textContent || "{}");

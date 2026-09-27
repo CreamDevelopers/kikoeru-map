@@ -1,5 +1,5 @@
 import { api, errorMessage } from "./api.js";
-import { h, icon, toast, wireDialog } from "./dom.js";
+import { confirmDialog, h, icon, toast, wireDialog } from "./dom.js";
 import { formatDate, t } from "./i18n.js";
 
 const KEY = "kk_tokens";
@@ -126,7 +126,8 @@ async function render(body) {
               type: "button",
               class: "danger",
               onclick: async () => {
-                if (!confirm(t("mine.confirm_delete"))) return;
+                const ok = await confirmDialog(t("mine.confirm_delete"), { ok: t("ui.delete"), cancel: t("ui.cancel"), danger: true });
+                if (!ok) return;
                 try {
                   await api(`/api/sounds/${encodeURIComponent(s.id)}`, { method: "DELETE", headers: { "X-Delete-Token": token } });
                   removeToken(s.id);

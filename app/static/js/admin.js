@@ -1,4 +1,4 @@
-import { h } from "./dom.js";
+import { confirmDialog, h } from "./dom.js";
 
 let cfg = {};
 try {
@@ -22,9 +22,17 @@ async function call(path, { method = "GET", body } = {}) {
   return res.json();
 }
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-confirm]");
-  if (btn && !confirm(btn.dataset.confirm)) e.preventDefault();
+  if (!btn || btn.dataset.confirmed) return;
+  e.preventDefault();
+  const danger = btn.classList.contains("danger");
+  if (!(await confirmDialog(btn.dataset.confirm, { ok: danger ? "実行する" : "OK", danger }))) return;
+  // 確認済みの印を付けて同じボタンで押し直す（name/value も一緒に送られる）
+  btn.dataset.confirmed = "1";
+  if (btn.form) btn.form.requestSubmit(btn);
+  else btn.click();
+  delete btn.dataset.confirmed;
 });
 
 document.getElementById("select-all")?.addEventListener("change", (e) => {
