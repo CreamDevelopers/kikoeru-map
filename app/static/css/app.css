@@ -58,6 +58,9 @@
   box-sizing: border-box;
   box-shadow: none !important;
 }
+[hidden] {
+  display: none !important;
+}
 
 html,
 body {

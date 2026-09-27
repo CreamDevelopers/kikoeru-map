@@ -228,6 +228,12 @@ export class PostFlow {
     rec.onstop = async () => {
       stream.getTracks().forEach((tr) => tr.stop());
       if (this.discardRecording) return;
+      // デコードできない形式でもサーバー送信前に止められるよう、録音時間で判定する
+      if ((Date.now() - this.recStart.getTime()) / 1000 < MIN_SEC) {
+        $("rec-time").textContent = `0:00 / ${formatDuration(MAX_SEC)}`;
+        toast(t("error.too_short"));
+        return;
+      }
       const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
       this.recordedAt = this.recStart;
       await this.loadBlob(blob);
